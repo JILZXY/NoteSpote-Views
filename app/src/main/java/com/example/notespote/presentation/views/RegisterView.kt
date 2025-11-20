@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -19,22 +18,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.notespot.presentation.components.buttons.PrimaryButton
-import com.example.notespot.presentation.components.inputs.EmailInput
-import com.example.notespot.presentation.components.inputs.PasswordInput
-import com.example.notespot.presentation.components.inputs.UserInput
+import com.example.notespote.presentation.components.inputs.EmailInput
+import com.example.notespote.presentation.components.inputs.PasswordInput
+import com.example.notespote.presentation.components.inputs.UserInput
 import com.example.notespote.presentation.theme.Celeste
-import com.example.notespote.presentation.theme.MajorelleBlue
 import com.example.notespote.presentation.theme.RichBlack
-import com.example.notespote.presentation.theme.YellowOrange
-
+import com.example.notespote.presentation.theme.SyneMonoFamily
+import com.example.notespote.presentation.theme.UrbanistFamily
 
 @Composable
 fun RegisterView(
@@ -50,40 +48,67 @@ fun RegisterView(
         modifier = Modifier
             .fillMaxSize()
             .background(RichBlack)
-            .padding(horizontal = 32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+            .padding(horizontal = 32.dp)
+            .padding(top = 80.dp),
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.Top
     ) {
         Text(
             text = "¡Hola!",
-            style = MaterialTheme.typography.displayLarge,
-            color = Celeste
+            fontFamily = UrbanistFamily,
+            fontWeight = FontWeight.Bold,
+            fontSize = 72.sp,
+            color = Color.White
         )
 
         Text(
             text = buildAnnotatedString {
-                withStyle(style = SpanStyle(color = YellowOrange)) {
-                    append("Bien")
+                withStyle(style = SpanStyle(color = Color(0xFFFFB347))) {
+                    append("B")
                 }
-                withStyle(style = SpanStyle(color = MajorelleBlue)) {
-                    append("veni")
+                withStyle(style = SpanStyle(color = Color(0xFFFF9E9E))) {
+                    append("i")
                 }
-                withStyle(style = SpanStyle(color = Celeste)) {
-                    append("do")
+                withStyle(style = SpanStyle(color = Color(0xFFFFF599))) {
+                    append("e")
+                }
+                withStyle(style = SpanStyle(color = Color(0xFF91F48F))) {
+                    append("n")
+                }
+                withStyle(style = SpanStyle(color = Color(0xFF9EFFFF))) {
+                    append("v")
+                }
+                withStyle(style = SpanStyle(color = Color(0xFFFD99FF))) {
+                    append("e")
+                }
+                withStyle(style = SpanStyle(color = Color(0xFFB69CFF))) {
+                    append("n")
+                }
+                withStyle(style = SpanStyle(color = Color(0xFF624AF2))) {
+                    append("i")
+                }
+                withStyle(style = SpanStyle(color = Color(0xFFFCDDEC))) {
+                    append("d")
+                }
+                withStyle(style = SpanStyle(color = Color.White)) {
+                    append("o")
                 }
             },
-            style = MaterialTheme.typography.displayLarge
+            fontFamily = UrbanistFamily,
+            fontWeight = FontWeight.Bold,
+            fontSize = 72.sp
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
             text = "Registra tu cuenta",
-            style = MaterialTheme.typography.bodyLarge,
+            fontFamily = SyneMonoFamily,
+            fontSize = 20.sp,
             color = Celeste
         )
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(40.dp))
 
         UserInput(
             value = username,
@@ -91,7 +116,7 @@ fun RegisterView(
             placeholder = "Usuario"
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
         EmailInput(
             value = email,
@@ -99,7 +124,7 @@ fun RegisterView(
             placeholder = "Correo electrónico"
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
         PasswordInput(
             value = password,
@@ -107,7 +132,7 @@ fun RegisterView(
             placeholder = "Contraseña"
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
         PasswordInput(
             value = confirmPassword,
@@ -115,14 +140,14 @@ fun RegisterView(
             placeholder = "Confirma tu contraseña"
         )
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(40.dp))
 
         PrimaryButton(
             text = "Regístrate",
             onClick = onRegisterClick
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(48.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -130,14 +155,14 @@ fun RegisterView(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Have an account ? ",
-                fontFamily = FontFamily.Monospace,
+                text = "¿Ya tienes una cuenta?  ",
+                fontFamily = UrbanistFamily,
                 fontSize = 14.sp,
-                color = Celeste
+                color = Color.White
             )
             Text(
-                text = "Log In",
-                fontFamily = FontFamily.Monospace,
+                text = "Inicia Sesión",
+                fontFamily = UrbanistFamily,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 color = Celeste,

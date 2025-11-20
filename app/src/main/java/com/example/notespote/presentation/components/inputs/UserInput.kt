@@ -1,19 +1,20 @@
-package com.example.notespot.presentation.components.inputs
+package com.example.notespote.presentation.components.inputs
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.example.notespote.presentation.theme.Celeste
 import com.example.notespote.presentation.theme.RichBlack
+import com.example.notespote.presentation.theme.UrbanistFamily
 
 @Composable
 fun UserInput(
@@ -22,31 +23,36 @@ fun UserInput(
     placeholder: String,
     modifier: Modifier = Modifier
 ) {
-    OutlinedTextField(
+    TextField(
         value = value,
         onValueChange = onValueChange,
-        modifier = modifier.fillMaxWidth(),
-        placeholder = { Text(placeholder) },
+        modifier = modifier
+            .fillMaxWidth()
+            .border(2.dp, Color.White, RoundedCornerShape(16.dp)),
+        placeholder = {
+            Text(
+                text = placeholder,
+                fontFamily = UrbanistFamily,
+                color = Color.Gray
+            )
+        },
         leadingIcon = {
             Icon(
                 imageVector = Icons.Default.Person,
-                contentDescription = null
+                contentDescription = null,
+                tint = Color.White
             )
         },
         singleLine = true,
         shape = RoundedCornerShape(16.dp),
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = Celeste,
-            unfocusedBorderColor = Celeste,
-            focusedTextColor = Celeste,
-            unfocusedTextColor = Celeste,
-            cursorColor = Celeste,
-            focusedLeadingIconColor = Celeste,
-            unfocusedLeadingIconColor = Celeste,
-            focusedPlaceholderColor = Color.Gray,
-            unfocusedPlaceholderColor = Color.Gray,
+        colors = TextFieldDefaults.colors(
+            focusedTextColor = RichBlack,
+            unfocusedTextColor = RichBlack,
+            cursorColor = Color.White,
             focusedContainerColor = RichBlack,
-            unfocusedContainerColor = RichBlack
+            unfocusedContainerColor = RichBlack,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent
         )
     )
 }

@@ -1,2 +1,7 @@
-package com.example.notespote.presentation.navigation
+package com.example.notespot.presentation.navigation
 
+sealed class Routes(val route: String) {
+    object Login : Routes("login")
+    object Register : Routes("register")
+    object Home : Routes("home")
+}

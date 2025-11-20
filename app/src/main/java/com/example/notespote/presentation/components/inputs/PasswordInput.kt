@@ -1,5 +1,6 @@
-package com.example.notespot.presentation.components.inputs
+package com.example.notespote.presentation.components.inputs
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -9,9 +10,9 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -23,8 +24,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import com.example.notespote.presentation.theme.Celeste
 import com.example.notespote.presentation.theme.RichBlack
+import com.example.notespote.presentation.theme.UrbanistFamily
+
 
 @Composable
 fun PasswordInput(
@@ -35,22 +37,32 @@ fun PasswordInput(
 ) {
     var passwordVisible by remember { mutableStateOf(false) }
 
-    OutlinedTextField(
+    TextField(
         value = value,
         onValueChange = onValueChange,
-        modifier = modifier.fillMaxWidth(),
-        placeholder = { Text(placeholder) },
+        modifier = modifier
+            .fillMaxWidth()
+            .border(2.dp, Color.White, RoundedCornerShape(16.dp)),
+        placeholder = {
+            Text(
+                text = placeholder,
+                fontFamily = UrbanistFamily,
+                color = Color.Gray
+            )
+        },
         leadingIcon = {
             Icon(
                 imageVector = Icons.Default.Lock,
-                contentDescription = null
+                contentDescription = null,
+                tint = Color.White
             )
         },
         trailingIcon = {
             IconButton(onClick = { passwordVisible = !passwordVisible }) {
                 Icon(
                     imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                    contentDescription = null
+                    contentDescription = null,
+                    tint = Color.White
                 )
             }
         },
@@ -58,20 +70,14 @@ fun PasswordInput(
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
         singleLine = true,
         shape = RoundedCornerShape(16.dp),
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = Celeste,
-            unfocusedBorderColor = Celeste,
-            focusedTextColor = Celeste,
-            unfocusedTextColor = Celeste,
-            cursorColor = Celeste,
-            focusedLeadingIconColor = Celeste,
-            unfocusedLeadingIconColor = Celeste,
-            focusedTrailingIconColor = Celeste,
-            unfocusedTrailingIconColor = Celeste,
-            focusedPlaceholderColor = Color.Gray,
-            unfocusedPlaceholderColor = Color.Gray,
+        colors = TextFieldDefaults.colors(
+            focusedTextColor = RichBlack,
+            unfocusedTextColor = RichBlack,
+            cursorColor = Color.White,
             focusedContainerColor = RichBlack,
-            unfocusedContainerColor = RichBlack
+            unfocusedContainerColor = RichBlack,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent
         )
     )
 }
