@@ -71,8 +71,8 @@ fun PasswordInput(
         singleLine = true,
         shape = RoundedCornerShape(16.dp),
         colors = TextFieldDefaults.colors(
-            focusedTextColor = RichBlack,
-            unfocusedTextColor = RichBlack,
+            focusedTextColor = Color.White,
+            unfocusedTextColor = Color.White,
             cursorColor = Color.White,
             focusedContainerColor = RichBlack,
             unfocusedContainerColor = RichBlack,
