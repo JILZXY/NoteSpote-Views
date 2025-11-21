@@ -5,9 +5,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.notespot.presentation.navigation.Routes
-import com.example.notespot.presentation.views.LoadView
 import com.example.notespot.presentation.views.LoginView
 import com.example.notespot.presentation.views.RegisterView
+import com.example.notespote.presentation.views.LoadView
 
 import com.example.notespote.presentation.views.PreloadView
 

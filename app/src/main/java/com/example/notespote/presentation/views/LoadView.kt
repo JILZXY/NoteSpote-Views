@@ -1,4 +1,4 @@
-package com.example.notespot.presentation.views
+package com.example.notespote.presentation.views
 
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -9,6 +9,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
@@ -39,10 +40,10 @@ fun LoadView(
 
     val infiniteTransition = rememberInfiniteTransition(label = "bounce")
     val bounce by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = -15f,
+        initialValue = 10f,
+        targetValue = 5f,
         animationSpec = infiniteRepeatable(
-            animation = tween(1500),
+            animation = tween(2500),
             repeatMode = RepeatMode.Reverse
         ),
         label = "bounce"
@@ -55,7 +56,7 @@ fun LoadView(
         contentAlignment = Alignment.Center
     ) {
         Image(
-            painter = painterResource(id = R.drawable.logo_notespot_black),
+            painter = painterResource(id = R.drawable.logo_notespot_white),
             contentDescription = null,
             modifier = Modifier.size(120.dp)
         )
@@ -64,7 +65,7 @@ fun LoadView(
             painter = painterResource(id = R.drawable.mascot_notespot),
             contentDescription = null,
             modifier = Modifier
-                .size(220.dp)
+                .fillMaxWidth()
                 .align(Alignment.BottomCenter)
                 .offset(y = bounce.dp)
         )
