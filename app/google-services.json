@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "737647115044",
+    "project_id": "notespot-88efc",
+    "storage_bucket": "notespot-88efc.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:737647115044:android:d565e5a56c0a1876e691b1",
+        "android_client_info": {
+          "package_name": "com.example.notespote"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAUFLx0IiwQ07-lWSPZIe3HXAlzqp-S5SQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
