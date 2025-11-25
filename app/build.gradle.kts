@@ -3,14 +3,13 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("com.google.devtools.ksp")
-    id("com.google.gms.google-services")
+    alias(libs.plugins.crashlytics)
+    alias(libs.plugins.googleServices)
 }
 
 android {
     namespace = "com.example.notespote"
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.notespote"
@@ -104,9 +103,18 @@ dependencies {
 
     implementation("androidx.compose.ui:ui-text-google-fonts:1.7.5")
 
-    implementation(platform("com.google.firebase:firebase-bom:34.6.0"))
-    implementation("com.google.firebase:firebase-analytics")
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analytics)
+    implementation(libs.firebase.crashlytics)
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
+    implementation(libs.coil)
+    implementation(libs.coil.compose)
+    implementation(libs.coil.svg)
+    implementation(libs.coil.gif)
 
-    
+    // Apache POI (para leer/escribir archivos Office: Word, Excel, PowerPoint)
+    implementation(libs.apache.poi)
+    implementation(libs.apache.poi.ooxml)
 
 }
