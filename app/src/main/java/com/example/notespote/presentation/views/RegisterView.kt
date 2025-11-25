@@ -26,21 +26,23 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.notespot.presentation.components.buttons.PrimaryButton
-
 import com.example.notespote.presentation.components.inputs.EmailInput
 import com.example.notespote.presentation.components.inputs.PasswordInput
+import com.example.notespote.presentation.components.inputs.UserInput
 import com.example.notespote.presentation.theme.Celeste
 import com.example.notespote.presentation.theme.RichBlack
 import com.example.notespote.presentation.theme.SyneMonoFamily
 import com.example.notespote.presentation.theme.UrbanistFamily
 
 @Composable
-fun LoginView(
-    onLoginClick: () -> Unit,
-    onRegisterClick: () -> Unit
+fun RegisterView(
+    onRegisterClick: () -> Unit,
+    onLoginClick: () -> Unit
 ) {
+    var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
@@ -100,7 +102,7 @@ fun LoginView(
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = "Ingresa tus datos",
+            text = "Registra tu cuenta",
             fontFamily = SyneMonoFamily,
             fontSize = 20.sp,
             color = Celeste
@@ -108,10 +110,18 @@ fun LoginView(
 
         Spacer(modifier = Modifier.height(40.dp))
 
+        UserInput(
+            value = username,
+            onValueChange = { username = it },
+            placeholder = "Usuario"
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
         EmailInput(
             value = email,
             onValueChange = { email = it },
-            placeholder = "Usuario o correo electrónico"
+            placeholder = "Correo electrónico"
         )
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -122,11 +132,19 @@ fun LoginView(
             placeholder = "Contraseña"
         )
 
+        Spacer(modifier = Modifier.height(20.dp))
+
+        PasswordInput(
+            value = confirmPassword,
+            onValueChange = { confirmPassword = it },
+            placeholder = "Confirma tu contraseña"
+        )
+
         Spacer(modifier = Modifier.height(40.dp))
 
         PrimaryButton(
-            text = "Inicia Sesión",
-            onClick = onLoginClick
+            text = "Regístrate",
+            onClick = onRegisterClick
         )
 
         Spacer(modifier = Modifier.height(48.dp))
@@ -137,18 +155,18 @@ fun LoginView(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "¿No tienes una cuenta?  ",
+                text = "¿Ya tienes una cuenta?  ",
                 fontFamily = UrbanistFamily,
                 fontSize = 14.sp,
                 color = Color.White
             )
             Text(
-                text = "Regístrate",
+                text = "Inicia Sesión",
                 fontFamily = UrbanistFamily,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 color = Celeste,
-                modifier = Modifier.clickable { onRegisterClick() }
+                modifier = Modifier.clickable { onLoginClick() }
             )
         }
     }
