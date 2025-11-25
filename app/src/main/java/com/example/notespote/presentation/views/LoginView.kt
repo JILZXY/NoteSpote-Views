@@ -26,7 +26,6 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.notespot.presentation.components.buttons.PrimaryButton
-
 import com.example.notespote.presentation.components.inputs.EmailInput
 import com.example.notespote.presentation.components.inputs.PasswordInput
 import com.example.notespote.presentation.theme.Celeste
@@ -97,12 +96,12 @@ fun LoginView(
             fontSize = 72.sp
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         Text(
             text = "Ingresa tus datos",
             fontFamily = SyneMonoFamily,
-            fontSize = 20.sp,
+            fontSize = 14.sp,
             color = Celeste
         )
 
@@ -126,7 +125,9 @@ fun LoginView(
 
         PrimaryButton(
             text = "Inicia Sesión",
-            onClick = onLoginClick
+            onClick = {
+                onLoginClick()
+            }
         )
 
         Spacer(modifier = Modifier.height(48.dp))
