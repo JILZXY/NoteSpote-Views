@@ -14,6 +14,7 @@ service = "4.4.4"
 crashlytics = "3.0.2"
 coil = "2.6.0"
 poi = "5.2.5"
+adapters = "3.2.0-alpha11"
 
 
 [libraries]
@@ -44,6 +45,7 @@ coil-svg = { group = "io.coil-kt", name = "coil-svg", version.ref = "coil" }
 coil-gif = { group = "io.coil-kt", name = "coil-gif", version.ref = "coil" }
 apache-poi = { group = "org.apache.poi", name = "poi", version.ref = "poi" }
 apache-poi-ooxml = { group = "org.apache.poi", name = "poi-ooxml", version.ref = "poi" }
+androidx-adapters = { group = "androidx.databinding", name = "adapters", version.ref = "adapters" }
 
 
 [plugins]
