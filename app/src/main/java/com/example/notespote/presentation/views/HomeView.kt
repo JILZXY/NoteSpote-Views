@@ -41,11 +41,12 @@ import com.example.notespote.presentation.theme.UrbanistFamily
 @Composable
 fun HomeView(
     userName: String = "Naimur",
-    onCreateFolderClick: () -> Unit,
     onProfileClick: () -> Unit,
-    onAddNoteClick: () -> Unit
+    onAddNoteClick: () -> Unit,
+    onCreateFolderClick: () -> Unit
 ) {
     var showNoteDialog by remember { mutableStateOf(false) }
+    var showFolderDialog by remember { mutableStateOf(false) }
 
     Box(
         modifier = Modifier
@@ -114,7 +115,7 @@ fun HomeView(
 
             WelcomeCard(
                 onAddNoteClick = { showNoteDialog = true },
-                onCreateFolderClick = onCreateFolderClick
+                onCreateFolderClick = { showFolderDialog = true }
             )
 
             Spacer(modifier = Modifier.height(45.dp))
@@ -147,7 +148,7 @@ fun HomeView(
 
         FloatingActionButtons(
             onAddNoteClick = { showNoteDialog = true },
-            onCreateFolderClick = onCreateFolderClick,
+            onCreateFolderClick = { showFolderDialog = true },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(end = 24.dp, bottom = 100.dp)
@@ -159,6 +160,16 @@ fun HomeView(
                 onCreateNote = { note ->
                     // Here you would typically handle the created note, e.g., pass to a ViewModel
                     showNoteDialog = false
+                }
+            )
+        }
+
+        if (showFolderDialog) {
+            NewFolderView(
+                onDismiss = { showFolderDialog = false },
+                onCreateFolder = { folder ->
+                    // Here you would typically handle the created folder, e.g., pass to a ViewModel
+                    showFolderDialog = false
                 }
             )
         }
