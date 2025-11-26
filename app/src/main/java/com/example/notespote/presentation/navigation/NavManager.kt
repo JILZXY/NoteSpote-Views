@@ -58,7 +58,7 @@ fun NavManager() {
 
         composable(Routes.Register.route) {
             RegisterView (
-                onRegisterClick = {
+                onRegisterSuccess = {
 
                 },
                 onLoginClick = {

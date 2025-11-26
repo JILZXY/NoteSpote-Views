@@ -76,7 +76,7 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended")
 
 // Navegación moderna en Compose
-    implementation("androidx.navigation:navigation-compose:2.7.7")
+    implementation("androidx.navigation:navigation-compose:2.9.5")
 
     // ViewModel integrado con Compose
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
@@ -84,13 +84,13 @@ dependencies {
     // Lifecycle reactivo (collectAsStateWithLifecycle)
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.7.0")
 
+    val room_version = "2.8.3"
+    implementation("androidx.room:room-runtime:$room_version")
+    implementation("androidx.room:room-ktx:$room_version")
+    ksp("androidx.room:room-compiler:$room_version")
 
-    val roomVersion = "2.6.1"
-    implementation("androidx.room:room-runtime:$roomVersion")
-    implementation("androidx.room:room-ktx:$roomVersion")
-    // El procesador de anotaciones (usa ksp en lugar de kapt/annotationProcessor)
-    ksp("androidx.room:room-compiler:$roomVersion")
-
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
@@ -104,6 +104,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-text-google-fonts:1.7.5")
 
     implementation(platform(libs.firebase.bom))
+    implementation("com.google.firebase:firebase-storage")
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.auth)

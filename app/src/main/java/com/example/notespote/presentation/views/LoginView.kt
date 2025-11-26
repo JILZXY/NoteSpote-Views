@@ -1,5 +1,6 @@
 package com.example.notespot.presentation.views
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -145,7 +146,7 @@ fun LoginView(
                         if (task.isSuccessful) {
                             // Inicio de sesión exitoso
                             Toast.makeText(context, "¡Inicio de sesión exitoso!", Toast.LENGTH_SHORT).show()
-                            onLoginSuccess() // Navega a la siguiente pantalla
+                            onLoginClick() // Navega a la siguiente pantalla
                         } else {
                             // Si falla, muestra el error de Firebase
                             val errorMessage = task.exception?.message ?: "Error desconocido."
