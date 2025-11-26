@@ -1,6 +1,5 @@
 package com.example.notespot.presentation.views
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -39,7 +38,7 @@ import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun LoginView(
-    onLoginSuccess: () -> Unit, // Cambiado para mayor claridad
+    onLoginClick: () -> Unit,
     onRegisterClick: () -> Unit
 ) {
     var email by remember { mutableStateOf("") }

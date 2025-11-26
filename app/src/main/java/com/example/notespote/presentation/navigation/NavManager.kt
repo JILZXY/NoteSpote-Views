@@ -46,13 +46,9 @@ fun NavManager() {
         }
 
         composable(Routes.Login.route) {
-            LoginView(
-                onLoginSuccess = {
-                    navController.navigate(Routes.Home.route) {
-                        popUpTo(Routes.Login.route) {
-                            inclusive = true
-                        }
-                    }
+            LoginView (
+                onLoginClick = {
+
                 },
                 onRegisterClick = {
                     navController.navigate(Routes.Register.route)
@@ -62,7 +58,7 @@ fun NavManager() {
 
         composable(Routes.Register.route) {
             RegisterView (
-                onRegisterSuccess = {
+                onRegisterClick = {
 
                 },
                 onLoginClick = {
