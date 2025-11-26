@@ -9,8 +9,6 @@ import androidx.compose.ui.text.googlefonts.GoogleFont
 import androidx.compose.ui.unit.sp
 import com.example.notespote.R
 
-
-
 val provider = GoogleFont.Provider(
     providerAuthority = "com.google.android.gms.fonts",
     providerPackage = "com.google.android.gms",
@@ -19,6 +17,7 @@ val provider = GoogleFont.Provider(
 
 val UrbanistFont = GoogleFont("Urbanist")
 val SyneMonoFont = GoogleFont("Syne Mono")
+val OutfitFont = GoogleFont("Outfit")
 
 val UrbanistFamily = FontFamily(
     Font(googleFont = UrbanistFont, fontProvider = provider, weight = FontWeight.Normal),
@@ -27,6 +26,11 @@ val UrbanistFamily = FontFamily(
 
 val SyneMonoFamily = FontFamily(
     Font(googleFont = SyneMonoFont, fontProvider = provider, weight = FontWeight.Normal)
+)
+
+val OutfitFamily = FontFamily(
+    Font(googleFont = OutfitFont, fontProvider = provider, weight = FontWeight.Normal),
+    Font(googleFont = OutfitFont, fontProvider = provider, weight = FontWeight.Bold)
 )
 
 val Typography = Typography(

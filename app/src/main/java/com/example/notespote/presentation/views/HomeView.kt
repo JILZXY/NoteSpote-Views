@@ -1,4 +1,4 @@
- package com.example.notespot.presentation.views
+package com.example.notespote.presentation.views
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -18,15 +18,21 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.notespot.presentation.components.buttons.FloatingActionButtons
-import com.example.notespot.presentation.components.cards.WelcomeCard
+import com.example.notespote.domain.model.Note
+import com.example.notespote.presentation.components.buttons.FloatingActionButtons
+import com.example.notespote.presentation.components.cards.WelcomeCard
 import com.example.notespote.presentation.theme.Celeste
 import com.example.notespote.presentation.theme.RichBlack
 import com.example.notespote.presentation.theme.SyneMonoFamily
@@ -35,11 +41,12 @@ import com.example.notespote.presentation.theme.UrbanistFamily
 @Composable
 fun HomeView(
     userName: String = "Naimur",
-    onAddNoteClick: () -> Unit,
     onCreateFolderClick: () -> Unit,
-    onMenuClick: () -> Unit,
-    onProfileClick: () -> Unit
+    onProfileClick: () -> Unit,
+    onAddNoteClick: () -> Unit
 ) {
+    var showNoteDialog by remember { mutableStateOf(false) }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -49,7 +56,7 @@ fun HomeView(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 24.dp)
-                .padding(top = 40.dp, bottom = 80.dp)
+                .padding(top = 60.dp, bottom = 80.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -82,13 +89,13 @@ fun HomeView(
                             text = "Hola, $userName",
                             fontFamily = UrbanistFamily,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 20.sp,
+                            fontSize = 27.sp,
                             color = Color.White
                         )
                         Text(
                             text = "Vamos a explorar tus apuntes",
                             fontFamily = SyneMonoFamily,
-                            fontSize = 12.sp,
+                            fontSize = 13.sp,
                             color = Color.Gray
                         )
                     }
@@ -106,38 +113,54 @@ fun HomeView(
             Spacer(modifier = Modifier.height(24.dp))
 
             WelcomeCard(
-                onAddNoteClick = onAddNoteClick,
+                onAddNoteClick = { showNoteDialog = true },
                 onCreateFolderClick = onCreateFolderClick
             )
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(45.dp))
 
             Text(
                 text = "Escritorio",
                 fontFamily = UrbanistFamily,
                 fontWeight = FontWeight.Bold,
-                fontSize = 24.sp,
+                fontSize = 32.sp,
                 color = Color.White
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                text = "Tu escritorio está vacío. Agrega una nota o\nuna carpeta para iniciar.",
-                fontFamily = SyneMonoFamily,
-                fontSize = 12.sp,
-                color = Color.Gray,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            )
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Spacer(modifier = Modifier.height(32.dp))
+                Text(
+                    text = "Tu escritorio está vacío. Agrega una nota o una carpeta para iniciar.",
+                    fontFamily = UrbanistFamily,
+                    fontSize = 18.sp,
+                    color = Color.Gray,
+                    textAlign = TextAlign.Center
+                )
+            }
         }
 
         FloatingActionButtons(
-            onAddNoteClick = onAddNoteClick,
+            onAddNoteClick = { showNoteDialog = true },
             onCreateFolderClick = onCreateFolderClick,
-            onMenuClick = onMenuClick,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(end = 24.dp, bottom = 100.dp)
         )
+
+        if (showNoteDialog) {
+            NewNoteView(
+                onDismiss = { showNoteDialog = false },
+                onCreateNote = { note ->
+                    // Here you would typically handle the created note, e.g., pass to a ViewModel
+                    showNoteDialog = false
+                }
+            )
+        }
     }
 }

@@ -5,9 +5,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.notespot.presentation.navigation.Routes
-import com.example.notespot.presentation.views.HomeView
 import com.example.notespot.presentation.views.LoginView
 import com.example.notespot.presentation.views.RegisterView
+import com.example.notespote.presentation.views.HomeView
+import com.example.notespote.presentation.views.*
 import com.example.notespote.presentation.views.LoadView
 import com.example.notespote.presentation.views.PreloadView
 
@@ -58,7 +59,7 @@ fun NavManager() {
         }
 
         composable(Routes.Register.route) {
-            RegisterView(
+            RegisterView (
                 onRegisterClick = {
                     navController.navigate(Routes.Home.route) {
                         popUpTo(Routes.Register.route) { inclusive = true }
@@ -76,9 +77,6 @@ fun NavManager() {
 
                 },
                 onCreateFolderClick = {
-
-                },
-                onMenuClick = {
 
                 },
                 onProfileClick = {
