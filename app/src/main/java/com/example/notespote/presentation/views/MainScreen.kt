@@ -16,7 +16,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.notespote.presentation.components.buttons.FloatingActionButtons
+import com.example.notespot.presentation.components.buttons.FloatingActionButtons
 import com.example.notespote.presentation.components.navigation.BottomNavigationBar
 import com.example.notespote.presentation.navigation.BottomNavItem
 import com.example.notespote.presentation.navigation.Routes

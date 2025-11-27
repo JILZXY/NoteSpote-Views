@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -29,7 +28,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.notespot.presentation.components.buttons.FloatingActionButtons
-import com.example.notespot.presentation.components.
 import com.example.notespote.presentation.components.cards.WelcomeCard
 import com.example.notespote.presentation.theme.Celeste
 import com.example.notespote.presentation.theme.RichBlack
@@ -147,7 +145,6 @@ fun HomeView(
         FloatingActionButtons(
             onAddNoteClick = onAddNoteClick,
             onCreateFolderClick = onCreateFolderClick,
-            onMenuClick = onMenuClick,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(end = 24.dp, bottom = 100.dp)
