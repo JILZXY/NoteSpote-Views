@@ -1,4 +1,4 @@
-package com.example.notespote.data.repository
+package com.example.notespote.domain.repository
 
 import android.net.Uri
 import com.example.notespote.domain.model.EstadisticasUsuario
