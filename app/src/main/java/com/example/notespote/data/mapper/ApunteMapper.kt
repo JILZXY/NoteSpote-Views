@@ -1,4 +1,4 @@
-package com.example.notespote.di.mapper
+package com.example.notespote.data.mapper
 
 import com.example.notespote.data.local.entities.ApunteEntity
 import com.example.notespote.data.local.entities.SyncStatus
