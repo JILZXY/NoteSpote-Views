@@ -1,6 +1,7 @@
 package com.example.notespote.presentation.views
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,15 +14,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,8 +27,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.notespote.domain.model.Note
-import com.example.notespote.presentation.components.buttons.FloatingActionButtons
 import com.example.notespote.presentation.components.cards.WelcomeCard
 import com.example.notespote.presentation.theme.Celeste
 import com.example.notespote.presentation.theme.RichBlack
@@ -43,11 +38,9 @@ fun HomeView(
     userName: String = "Naimur",
     onProfileClick: () -> Unit,
     onAddNoteClick: () -> Unit,
-    onCreateFolderClick: () -> Unit
+    onCreateFolderClick: () -> Unit,
+    onNotificationsClick: () -> Unit
 ) {
-    var showNoteDialog by remember { mutableStateOf(false) }
-    var showFolderDialog by remember { mutableStateOf(false) }
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -61,10 +54,11 @@ fun HomeView(
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement = Arrangement.SpaceBetween, // Use SpaceBetween
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(
+                    modifier = Modifier.clickable { onProfileClick() }, // Make the profile part clickable
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Box(
@@ -102,10 +96,10 @@ fun HomeView(
                     }
                 }
 
-                IconButton(onClick = onProfileClick) {
+                IconButton(onClick = onNotificationsClick) { // Add notification button
                     Icon(
-                        imageVector = Icons.Default.MoreVert,
-                        contentDescription = null,
+                        imageVector = Icons.Outlined.Notifications,
+                        contentDescription = "Notificaciones",
                         tint = Color.White
                     )
                 }
@@ -114,8 +108,8 @@ fun HomeView(
             Spacer(modifier = Modifier.height(24.dp))
 
             WelcomeCard(
-                onAddNoteClick = { showNoteDialog = true },
-                onCreateFolderClick = { showFolderDialog = true }
+                onAddNoteClick = onAddNoteClick,
+                onCreateFolderClick = onCreateFolderClick
             )
 
             Spacer(modifier = Modifier.height(45.dp))
@@ -144,34 +138,6 @@ fun HomeView(
                     textAlign = TextAlign.Center
                 )
             }
-        }
-
-        FloatingActionButtons(
-            onAddNoteClick = { showNoteDialog = true },
-            onCreateFolderClick = { showFolderDialog = true },
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(end = 24.dp, bottom = 100.dp)
-        )
-
-        if (showNoteDialog) {
-            NewNoteView(
-                onDismiss = { showNoteDialog = false },
-                onCreateNote = { note ->
-                    // Here you would typically handle the created note, e.g., pass to a ViewModel
-                    showNoteDialog = false
-                }
-            )
-        }
-
-        if (showFolderDialog) {
-            NewFolderView(
-                onDismiss = { showFolderDialog = false },
-                onCreateFolder = { folder ->
-                    // Here you would typically handle the created folder, e.g., pass to a ViewModel
-                    showFolderDialog = false
-                }
-            )
         }
     }
 }
