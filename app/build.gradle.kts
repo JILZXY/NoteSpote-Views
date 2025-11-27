@@ -5,6 +5,8 @@ plugins {
     id("com.google.devtools.ksp")
     alias(libs.plugins.crashlytics)
     alias(libs.plugins.googleServices)
+    id ("kotlin-kapt")
+   // alias(libs.plugins.dagger.hilt.android)
 }
 
 android {
@@ -53,6 +55,7 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.adapters)
+    implementation(libs.androidx.work.runtime.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -114,6 +117,18 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.coil.svg)
     implementation(libs.coil.gif)
+    // Hilt para inyección de dependencias
+//    implementation ("com.google.dagger:hilt-android:2.48")
+////    kapt ("com.google.dagger:hilt-compiler:2.48")
+
+// Hilt para AndroidX (incluye @ApplicationContext)
+//    implementation ("androidx.hilt:hilt-navigation-compose:1.1.0")
+//    implementation ("androidx.hilt:hilt-work:1.0.0")
+//    kapt ("androidx.hilt:hilt-compiler:1.1.0")
+
+// Kotlin coroutines y Flow
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
     // Apache POI (para leer/escribir archivos Office: Word, Excel, PowerPoint)
     implementation(libs.apache.poi)
