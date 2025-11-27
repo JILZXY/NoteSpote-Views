@@ -12,7 +12,6 @@ import javax.inject.Singleton
 @Singleton
 class ApunteMapper @Inject constructor() {
 
-    // Entity -> Domain
     fun toDomain(entity: ApunteEntity): Apunte {
         return Apunte(
             id = entity.idApunte,
@@ -35,7 +34,6 @@ class ApunteMapper @Inject constructor() {
         )
     }
 
-    // Domain -> Entity
     fun toEntity(domain: Apunte): ApunteEntity {
         return ApunteEntity(
             idApunte = domain.id,
@@ -61,7 +59,6 @@ class ApunteMapper @Inject constructor() {
         )
     }
 
-    // Entity -> DTO
     fun entityToDto(entity: ApunteEntity): ApunteDto {
         return ApunteDto(
             id = entity.idApunte,
@@ -86,7 +83,6 @@ class ApunteMapper @Inject constructor() {
         )
     }
 
-    // DTO -> Entity
     fun dtoToEntity(dto: ApunteDto): ApunteEntity {
         return ApunteEntity(
             idApunte = dto.id,
@@ -112,7 +108,6 @@ class ApunteMapper @Inject constructor() {
         )
     }
 
-    // ApunteWithDetails -> ApunteDetallado
     fun toApunteDetallado(
         apunteWithDetails: ApunteWithDetails,
         postitMapper: PostitMapper,
