@@ -1,6 +1,7 @@
 package com.example.notespote.data.repository
 
 import android.net.Uri
+import com.example.notespote.data.local.FileManager
 import com.example.notespote.data.local.dao.ApunteDao
 import com.example.notespote.data.local.dao.ArchivoAdjuntoDao
 import com.example.notespote.data.local.entities.ArchivoAdjuntoEntity
@@ -17,6 +18,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import java.util.UUID
 import javax.inject.Inject
+import com.example.notespote.data.model.Apunte
 
 class ApunteRepositoryImpl @Inject constructor(
     private val apunteDao: ApunteDao,
