@@ -17,9 +17,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarToday
-import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -124,7 +125,7 @@ fun CommunityCard(card: CommunityCardData, onAuthorClick: () -> Unit) {
                     Icon(Icons.Default.FavoriteBorder, contentDescription = "Me gusta", tint = Color.Red)
                 }
                 IconButton(onClick = { /*TODO*/ }) {
-                    Icon(Icons.Default.Download, contentDescription = "Descargar", tint = Color.White)
+                    Icon(Icons.Default.ThumbUp, contentDescription = "Descargar", tint = Color.White)
                 }
             }
         }

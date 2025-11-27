@@ -12,9 +12,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.Article
 import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material.icons.outlined.Folder
+import androidx.compose.material.icons.outlined.Email
+import androidx.compose.material.icons.outlined.List
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
@@ -63,7 +63,7 @@ fun FloatingActionButtons(
                     containerColor = Celeste
                 ) {
                     Icon(
-                        imageVector = Icons.Outlined.Article,
+                        imageVector = Icons.Outlined.List,
                         contentDescription = "Add Note",
                         tint = RichBlack,
                         modifier = Modifier.size(24.dp)
@@ -80,7 +80,7 @@ fun FloatingActionButtons(
                     containerColor = KhakiLight
                 ) {
                     Icon(
-                        imageVector = Icons.Outlined.Folder,
+                        imageVector = Icons.Outlined.Email,
                         contentDescription = "Create Folder",
                         tint = RichBlack,
                         modifier = Modifier.size(24.dp)
