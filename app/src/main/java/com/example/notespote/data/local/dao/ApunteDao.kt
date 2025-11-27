@@ -51,6 +51,9 @@ interface ApunteDao {
     @Transaction
     @Query("SELECT * FROM apunte WHERE id_apunte = :id")
     suspend fun getApunteWithDetails(id: String): ApunteWithDetails?
+
+    @Query("DELETE FROM apunte WHERE id_apunte = :id")
+    suspend fun delete(id: String)
 }
 
 data class ApunteWithDetails(

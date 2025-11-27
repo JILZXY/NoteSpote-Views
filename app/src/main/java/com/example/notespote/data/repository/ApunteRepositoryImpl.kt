@@ -1,11 +1,21 @@
 package com.example.notespote.data.repository
 
+import android.net.Uri
 import com.example.notespote.data.local.dao.ApunteDao
 import com.example.notespote.data.local.dao.ArchivoAdjuntoDao
+import com.example.notespote.data.local.entities.ArchivoAdjuntoEntity
+import com.example.notespote.data.local.entities.SyncStatus
 import com.example.notespote.data.network.NetworkMonitor
 import com.example.notespote.domain.repository.ApunteRepository
+import com.google.common.io.Files.getFileExtension
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
+import java.util.UUID
 import javax.inject.Inject
 
 class ApunteRepositoryImpl @Inject constructor(
