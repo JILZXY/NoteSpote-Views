@@ -10,6 +10,7 @@ import javax.inject.Inject
 import android.content.Context
 import android.util.Log
 import androidx.core.net.toUri
+import com.example.notespote.data.local.FileManager
 import com.example.notespote.data.local.entities.ApunteEntity
 import com.example.notespote.data.local.entities.ArchivoAdjuntoEntity
 import com.example.notespote.data.local.entities.SyncStatus
