@@ -1,6 +1,7 @@
 package com.example.notespot.presentation.views
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -23,10 +25,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.notespot.presentation.components.buttons.FloatingActionButtons
-import com.example.notespot.presentation.components.cards.WelcomeCard
+import com.example.notespot.presentation.components.
+import com.example.notespote.presentation.components.cards.WelcomeCard
 import com.example.notespote.presentation.theme.Celeste
 import com.example.notespote.presentation.theme.RichBlack
 import com.example.notespote.presentation.theme.SyneMonoFamily
@@ -35,10 +39,11 @@ import com.example.notespote.presentation.theme.UrbanistFamily
 @Composable
 fun HomeView(
     userName: String = "Naimur",
+    onProfileClick: () -> Unit,
     onAddNoteClick: () -> Unit,
     onCreateFolderClick: () -> Unit,
     onMenuClick: () -> Unit,
-    onProfileClick: () -> Unit
+    onNotificationsClick: () -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -49,7 +54,7 @@ fun HomeView(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 24.dp)
-                .padding(top = 40.dp, bottom = 80.dp)
+                .padding(top = 60.dp, bottom = 80.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -57,6 +62,7 @@ fun HomeView(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(
+                    modifier = Modifier.clickable { onProfileClick() }, // Make the profile part clickable
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Box(
@@ -82,22 +88,22 @@ fun HomeView(
                             text = "Hola, $userName",
                             fontFamily = UrbanistFamily,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 20.sp,
+                            fontSize = 27.sp,
                             color = Color.White
                         )
                         Text(
                             text = "Vamos a explorar tus apuntes",
                             fontFamily = SyneMonoFamily,
-                            fontSize = 12.sp,
+                            fontSize = 13.sp,
                             color = Color.Gray
                         )
                     }
                 }
 
-                IconButton(onClick = onProfileClick) {
+                IconButton(onClick = onNotificationsClick) { // Add notification button
                     Icon(
-                        imageVector = Icons.Default.MoreVert,
-                        contentDescription = null,
+                        imageVector = Icons.Outlined.Notifications,
+                        contentDescription = "Notificaciones",
                         tint = Color.White
                     )
                 }
@@ -110,25 +116,32 @@ fun HomeView(
                 onCreateFolderClick = onCreateFolderClick
             )
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(45.dp))
 
             Text(
                 text = "Escritorio",
                 fontFamily = UrbanistFamily,
                 fontWeight = FontWeight.Bold,
-                fontSize = 24.sp,
+                fontSize = 32.sp,
                 color = Color.White
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                text = "Tu escritorio está vacío. Agrega una nota o\nuna carpeta para iniciar.",
-                fontFamily = SyneMonoFamily,
-                fontSize = 12.sp,
-                color = Color.Gray,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            )
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Spacer(modifier = Modifier.height(32.dp))
+                Text(
+                    text = "Tu escritorio está vacío. Agrega una nota o una carpeta para iniciar.",
+                    fontFamily = UrbanistFamily,
+                    fontSize = 18.sp,
+                    color = Color.Gray,
+                    textAlign = TextAlign.Center
+                )
+            }
         }
 
         FloatingActionButtons(

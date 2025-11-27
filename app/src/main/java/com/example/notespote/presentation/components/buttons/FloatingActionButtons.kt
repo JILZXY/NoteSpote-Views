@@ -11,11 +11,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.Article
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Article
+import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
@@ -23,6 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -42,7 +47,8 @@ fun FloatingActionButtons(
 
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalAlignment = Alignment.End
     ) {
         AnimatedVisibility(
             visible = isExpanded,
@@ -50,18 +56,23 @@ fun FloatingActionButtons(
             exit = fadeOut(animationSpec = spring()) + shrinkVertically(animationSpec = spring())
         ) {
             Column(
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                horizontalAlignment = Alignment.End
             ) {
                 FloatingActionButton(
-                    onClick = onMenuClick,
+                    onClick = {
+                        onAddNoteClick()
+                        isExpanded = false
+                    },
                     modifier = Modifier.size(56.dp),
                     shape = CircleShape,
-                    containerColor = VioletWeb
+                    containerColor = Celeste
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Menu,
-                        contentDescription = null,
-                        tint = Color.White
+                        imageVector = Icons.Outlined.Article,
+                        contentDescription = "Add Note",
+                        tint = RichBlack,
+                        modifier = Modifier.size(24.dp)
                     )
                 }
 
@@ -76,28 +87,34 @@ fun FloatingActionButtons(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Folder,
-                        contentDescription = null,
-                        tint = RichBlack
-                    )
-                }
-
-                FloatingActionButton(
-                    onClick = {
-                        onAddNoteClick()
-                        isExpanded = false
-                    },
-                    modifier = Modifier.size(56.dp),
-                    shape = CircleShape,
-                    containerColor = Color.White
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Create,
-                        contentDescription = null,
-                        tint = RichBlack
+                        contentDescription = "Create Folder",
+                        tint = RichBlack,
+                        modifier = Modifier.size(24.dp)
                     )
                 }
             }
         }
+
+        val containerColor = if (isExpanded) VioletWeb else Celeste
+        val icon = if (isExpanded) Icons.Outlined.Close else Icons.Outlined.Add
+        val iconTint = if (isExpanded) Color.White else RichBlack
+
+        FloatingActionButton(
+            onClick = {
+                onAddNoteClick()
+                isExpanded = false
+            },
+            modifier = Modifier.size(56.dp),
+            shape = CircleShape,
+            containerColor = Color.White
+        ) {
+            Icon(
+                imageVector = Icons.Default.Create,
+                contentDescription = null,
+                tint = RichBlack
+            )
+        }
+    }
 
         FloatingActionButton(
             onClick = { isExpanded = !isExpanded },
@@ -111,6 +128,5 @@ fun FloatingActionButtons(
                 tint = RichBlack,
                 modifier = Modifier.size(32.dp)
             )
-        }
+                }
     }
-}
