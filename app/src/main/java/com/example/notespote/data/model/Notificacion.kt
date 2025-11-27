@@ -6,7 +6,7 @@ data class Notificacion(
     val tipo: TipoNotificacion,
     val titulo: String = "",
     val mensaje: String = "",
-    val idReferencia: String? = null, // ID del apunte, usuario, etc
+    val idReferencia: String? = null,
     val leida: Boolean = false,
     val fecha: Long = System.currentTimeMillis()
 )
