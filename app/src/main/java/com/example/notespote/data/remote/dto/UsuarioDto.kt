@@ -1,4 +1,4 @@
-package com.example.notespote.di.remote.dto
+package com.example.notespote.data.remote.dto
 
 import com.google.firebase.Timestamp
 
