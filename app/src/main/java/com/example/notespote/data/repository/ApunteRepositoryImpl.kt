@@ -18,6 +18,7 @@ import com.example.notespote.data.mapper.PostitMapper
 import com.example.notespote.data.network.NetworkMonitor
 import com.example.notespote.data.model.Apunte
 import com.example.notespote.data.model.ApunteDetallado
+import com.example.notespote.data.model.FiltroApuntes
 import com.example.notespote.domain.repository.ApunteRepository
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
@@ -221,7 +222,14 @@ class ApunteRepositoryImpl @Inject constructor(
         }
     }
 
-    fun getPublicApuntes(limit: Int): Flow<Result<List<Apunte>>> {
+    override suspend fun toggleLike(
+        apunteId: String,
+        userId: String
+    ): Result<Unit> {
+        TODO("Not yet implemented")
+    }
+
+    override fun getPublicApuntes(limit: Int): Flow<Result<List<Apunte>>> {
         return apunteDao.getPublicApuntes(limit)
             .map { entities ->
                 Result.success(entities.map { apunteMapper.toDomain(it) })
@@ -229,6 +237,10 @@ class ApunteRepositoryImpl @Inject constructor(
             .catch { e ->
                 emit(Result.failure(e))
             }
+    }
+
+    override fun searchApuntes(filtro: FiltroApuntes): Flow<Result<List<Apunte>>> {
+        TODO("Not yet implemented")
     }
 
     override suspend fun syncApuntes(): Result<Unit> = withContext(Dispatchers.IO) {
