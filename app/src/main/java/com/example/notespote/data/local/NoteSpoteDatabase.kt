@@ -4,6 +4,10 @@ import androidx.databinding.adapters.Converters
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import com.example.notespote.data.local.dao.ApunteDao
+import com.example.notespote.data.local.dao.ArchivoAdjuntoDao
+import com.example.notespote.data.local.dao.CarpetaDao
+import com.example.notespote.data.local.dao.EtiquetaApunteDao
 import com.example.notespote.data.local.entities.UsuarioEntity
 import com.example.notespote.data.local.entities.ApunteEntity
 import com.example.notespote.data.local.entities.ArchivoAdjuntoEntity
