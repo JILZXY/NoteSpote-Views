@@ -13,4 +13,11 @@ data class Usuario(
     val totalLikesRecibidos: Int = 0,
     val totalSeguidores: Int = 0,
     val totalSeguidos: Int = 0
-)
+) {
+    val nombreCompleto: String
+        get() = if (nombre != null && apellido != null) {
+            "$nombre $apellido"
+        } else {
+            nombreUsuario
+        }
+}
