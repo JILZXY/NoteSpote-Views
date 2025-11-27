@@ -7,16 +7,16 @@ import androidx.navigation.compose.rememberNavController
 import com.example.notespot.presentation.views.LoginView
 import com.example.notespot.presentation.views.RegisterView
 import com.example.notespote.presentation.views.AccountDataView
+import com.example.notespote.presentation.views.AllFoldersView
 import com.example.notespote.presentation.views.EditMyProfileView
 import com.example.notespote.presentation.views.EditProfileView
+import com.example.notespote.presentation.views.FolderDetailView
 import com.example.notespote.presentation.views.LoadView
-
 import com.example.notespote.presentation.views.MainScreen
 import com.example.notespote.presentation.views.MyProfileView
 import com.example.notespote.presentation.views.NotificationsView
 import com.example.notespote.presentation.views.PreloadView
 import com.example.notespote.presentation.views.ProfileView
-
 import com.example.notespote.presentation.views.UserProfileView
 
 @Composable
@@ -120,6 +120,17 @@ fun NavManager() {
 
         composable(Routes.UserProfile.route) {
             UserProfileView(onBackClick = { navController.popBackStack() })
+        }
+
+        composable(Routes.AllFolders.route) {
+            AllFoldersView(
+                onBackClick = { navController.popBackStack() },
+                onFolderClick = { navController.navigate(Routes.FolderDetail.route) }
+            )
+        }
+
+        composable(Routes.FolderDetail.route) {
+            FolderDetailView(onBackClick = { navController.popBackStack() })
         }
     }
 }

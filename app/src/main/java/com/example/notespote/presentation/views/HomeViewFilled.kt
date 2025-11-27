@@ -24,6 +24,7 @@ import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,7 +49,9 @@ fun HomeViewFilled(
     onProfileClick: () -> Unit,
     onNotificationsClick: () -> Unit,
     onAddNoteClick: () -> Unit,
-    onCreateFolderClick: () -> Unit
+    onCreateFolderClick: () -> Unit,
+    onSeeAllFoldersClick: () -> Unit,
+    onFolderClick: () -> Unit
 ) {
     val recentFolders = listOf(
         FolderCardData("Recientes", Color(0xFF97DECC), Icons.Default.History),
@@ -66,7 +69,7 @@ fun HomeViewFilled(
         modifier = Modifier
             .fillMaxSize()
             .background(RichBlack)
-            .padding(16.dp)
+            .padding(top = 32.dp, start = 16.dp, end = 16.dp, bottom = 16.dp)
     ) {
         // Header
         Row(
@@ -106,11 +109,18 @@ fun HomeViewFilled(
         Spacer(modifier = Modifier.height(24.dp))
 
         // Folders Section
-        Text("Carpetas", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold, fontFamily = OutfitFamily)
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+            Text("Carpetas", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold, fontFamily = OutfitFamily)
+            TextButton(onClick = { onSeeAllFoldersClick() }) {
+                Text("Ver todas", color = Color.Gray, fontSize = 12.sp, fontFamily = OutfitFamily)
+            }
+        }
         Spacer(modifier = Modifier.height(16.dp))
         LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             items(recentFolders) { folder ->
-                FolderCard(folder = folder)
+                Box(modifier = Modifier.clickable { onFolderClick() }) {
+                    FolderCard(folder = folder)
+                }
             }
         }
 

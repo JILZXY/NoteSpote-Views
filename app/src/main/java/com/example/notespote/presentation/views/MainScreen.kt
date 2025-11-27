@@ -58,7 +58,9 @@ fun MainScreen(navController: NavController) {
                         onProfileClick = { navController.navigate(Routes.Profile.route) },
                         onNotificationsClick = { navController.navigate(Routes.Notifications.route) },
                         onAddNoteClick = { showNoteDialog = true },
-                        onCreateFolderClick = { showFolderDialog = true }
+                        onCreateFolderClick = { showFolderDialog = true },
+                        onSeeAllFoldersClick = { navController.navigate(Routes.AllFolders.route) },
+                        onFolderClick = { navController.navigate(Routes.FolderDetail.route) }
                     )
                 }
                 composable(BottomNavItem.Search.route) {

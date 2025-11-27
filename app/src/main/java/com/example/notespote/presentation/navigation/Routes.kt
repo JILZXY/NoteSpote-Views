@@ -13,4 +13,6 @@ sealed class Routes(val route: String) {
     object AccountData : Routes("account_data")
     object EditMyProfile : Routes("edit_my_profile")
     object UserProfile : Routes("user_profile")
+    object AllFolders : Routes("all_folders")
+    object FolderDetail : Routes("folder_detail")
 }
