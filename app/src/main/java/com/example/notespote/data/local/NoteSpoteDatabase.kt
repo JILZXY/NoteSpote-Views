@@ -8,6 +8,12 @@ import com.example.notespote.data.local.dao.ApunteDao
 import com.example.notespote.data.local.dao.ArchivoAdjuntoDao
 import com.example.notespote.data.local.dao.CarpetaDao
 import com.example.notespote.data.local.dao.EtiquetaApunteDao
+import com.example.notespote.data.local.dao.EtiquetaDao
+import com.example.notespote.data.local.dao.LikeDao
+import com.example.notespote.data.local.dao.MateriaDao
+import com.example.notespote.data.local.dao.PostitDao
+import com.example.notespote.data.local.dao.SeguimientoDao
+import com.example.notespote.data.local.dao.UsuarioDao
 import com.example.notespote.data.local.entities.UsuarioEntity
 import com.example.notespote.data.local.entities.ApunteEntity
 import com.example.notespote.data.local.entities.ArchivoAdjuntoEntity
