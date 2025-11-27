@@ -9,8 +9,8 @@ import javax.inject.Singleton
 @Singleton
 class ArchivoAdjuntoMapper @Inject constructor() {
 
-    fun toDomain(entity: ArchivoAdjuntoEntity): ArchivoAdjunto {
-        return ArchivoAdjunto(
+    fun toDomain(entity: ArchivoAdjuntoEntity): com.example.notespote.domain.model.ArchivoAdjunto {
+        return _root_ide_package_.com.example.notespote.domain.model.ArchivoAdjunto(
             id = entity.idArchivo,
             idApunte = entity.idApunte,
             nombreArchivo = entity.nombreArchivo,
@@ -23,7 +23,7 @@ class ArchivoAdjuntoMapper @Inject constructor() {
         )
     }
 
-    fun toEntity(domain: ArchivoAdjunto): ArchivoAdjuntoEntity {
+    fun toEntity(domain: com.example.notespote.domain.model.ArchivoAdjunto): ArchivoAdjuntoEntity {
         return ArchivoAdjuntoEntity(
             idArchivo = domain.id,
             idApunte = domain.idApunte,

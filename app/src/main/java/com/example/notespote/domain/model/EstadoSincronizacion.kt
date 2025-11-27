@@ -1,11 +1,11 @@
-package com.example.notespote.data.model
+package com.example.notespote.domain.model
 
 data class EstadoSincronizacion(
     val sincronizando: Boolean = false,
     val ultimaSincronizacion: Long? = null,
     val itemsPendientes: Int = 0,
     val itemsSincronizados: Int = 0,
-    val errores: List<ErrorSincronizacion> = emptyList()
+    val errores: List<com.example.notespote.domain.model.ErrorSincronizacion> = emptyList()
 )
 
 data class ErrorSincronizacion(

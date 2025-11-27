@@ -3,7 +3,7 @@ package com.example.notespote.data.mapper
 import com.example.notespote.data.local.entities.CarpetaEntity
 import com.example.notespote.data.local.entities.SyncStatus
 import com.example.notespote.data.remote.dto.CarpetaDto
-import com.example.notespote.data.model.Carpeta
+import com.example.notespote.domain.model.Carpeta
 import com.google.firebase.Timestamp
 import java.util.Date
 import javax.inject.Inject
@@ -12,8 +12,8 @@ import javax.inject.Singleton
 @Singleton
 class CarpetaMapper @Inject constructor() {
 
-    fun toDomain(entity: CarpetaEntity): Carpeta {
-        return Carpeta(
+    fun toDomain(entity: CarpetaEntity): com.example.notespote.domain.model.Carpeta {
+        return _root_ide_package_.com.example.notespote.domain.model.Carpeta(
             id = entity.idCarpeta,
             idUsuario = entity.idUsuario,
             idMateria = entity.idMateria,
@@ -26,7 +26,7 @@ class CarpetaMapper @Inject constructor() {
         )
     }
 
-    fun toEntity(domain: Carpeta): CarpetaEntity {
+    fun toEntity(domain: com.example.notespote.domain.model.Carpeta): CarpetaEntity {
         return CarpetaEntity(
             idCarpeta = domain.id,
             idUsuario = domain.idUsuario,

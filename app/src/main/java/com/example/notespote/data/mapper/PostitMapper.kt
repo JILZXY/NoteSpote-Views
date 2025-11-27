@@ -12,8 +12,8 @@ import javax.inject.Singleton
 @Singleton
 class PostitMapper @Inject constructor() {
 
-    fun toDomain(entity: PostitEntity): Postit {
-        return Postit(
+    fun toDomain(entity: PostitEntity): com.example.notespote.domain.model.Postit {
+        return _root_ide_package_.com.example.notespote.domain.model.Postit(
             id = entity.idPostit,
             idApunte = entity.idApunte,
             titulo = entity.tituloPostit,
@@ -28,7 +28,7 @@ class PostitMapper @Inject constructor() {
         )
     }
 
-    fun toEntity(domain: Postit): PostitEntity {
+    fun toEntity(domain: com.example.notespote.domain.model.Postit): PostitEntity {
         return PostitEntity(
             idPostit = domain.id,
             idApunte = domain.idApunte,

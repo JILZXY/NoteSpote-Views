@@ -1,4 +1,4 @@
-package com.example.notespote.data.model
+package com.example.notespote.domain.model
 
 data class Usuario(
     val id: String = "",

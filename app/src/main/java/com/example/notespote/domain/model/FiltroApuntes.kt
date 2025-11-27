@@ -1,4 +1,4 @@
-package com.example.notespote.data.model
+package com.example.notespote.domain.model
 
 import com.example.notespote.data.local.entities.TipoVisibilidad
 
@@ -8,7 +8,7 @@ data class FiltroApuntes(
     val idCarpeta: String? = null,
     val etiquetas: List<String> = emptyList(),
     val tipoVisibilidad: TipoVisibilidad? = null,
-    val ordenamiento: OrdenApuntes = OrdenApuntes.FECHA_DESC,
+    val ordenamiento: com.example.notespote.domain.model.OrdenApuntes = _root_ide_package_.com.example.notespote.domain.model.OrdenApuntes.FECHA_DESC,
     val soloConImagenes: Boolean = false,
     val soloConPostits: Boolean = false
 )

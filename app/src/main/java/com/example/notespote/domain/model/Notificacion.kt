@@ -1,9 +1,9 @@
-package com.example.notespote.data.model
+package com.example.notespote.domain.model
 
 data class Notificacion(
     val id: String = "",
     val idUsuario: String = "",
-    val tipo: TipoNotificacion,
+    val tipo: com.example.notespote.domain.model.TipoNotificacion,
     val titulo: String = "",
     val mensaje: String = "",
     val idReferencia: String? = null,

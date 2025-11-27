@@ -3,7 +3,7 @@ package com.example.notespote.data.mapper
 import com.example.notespote.data.local.entities.SeguimientoEntity
 import com.example.notespote.data.local.entities.SyncStatus
 import com.example.notespote.data.remote.dto.SeguimientoDto
-import com.example.notespote.data.model.Seguimiento
+import com.example.notespote.domain.model.Seguimiento
 import com.google.firebase.Timestamp
 import java.util.Date
 import javax.inject.Inject
@@ -12,8 +12,8 @@ import javax.inject.Singleton
 @Singleton
 class SeguimientoMapper @Inject constructor() {
 
-    fun toDomain(entity: SeguimientoEntity): Seguimiento {
-        return Seguimiento(
+    fun toDomain(entity: SeguimientoEntity): com.example.notespote.domain.model.Seguimiento {
+        return _root_ide_package_.com.example.notespote.domain.model.Seguimiento(
             id = entity.idSeguimiento,
             idSeguidor = entity.idSeguidor,
             idSeguido = entity.idSeguido,
@@ -21,7 +21,7 @@ class SeguimientoMapper @Inject constructor() {
         )
     }
 
-    fun toEntity(domain: Seguimiento): SeguimientoEntity {
+    fun toEntity(domain: com.example.notespote.domain.model.Seguimiento): SeguimientoEntity {
         return SeguimientoEntity(
             idSeguimiento = domain.id,
             idSeguidor = domain.idSeguidor,

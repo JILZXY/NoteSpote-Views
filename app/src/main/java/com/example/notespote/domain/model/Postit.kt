@@ -1,4 +1,4 @@
-package com.example.notespote.data.model
+package com.example.notespote.domain.model
 
 // domain/model/Postit.kt
 data class Postit(

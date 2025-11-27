@@ -1,9 +1,9 @@
 package com.example.notespote.data.repository
 
 import android.net.Uri
-import com.example.notespote.data.model.EstadisticasUsuario
-import com.example.notespote.data.model.PerfilUsuario
-import com.example.notespote.data.model.Usuario
+import com.example.notespote.domain.model.EstadisticasUsuario
+import com.example.notespote.domain.model.PerfilUsuario
+import com.example.notespote.domain.model.Usuario
 import kotlinx.coroutines.flow.Flow
 
 interface UsuarioRepository {

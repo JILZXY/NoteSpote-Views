@@ -3,15 +3,15 @@ package com.example.notespote.data.mapper
 import com.example.notespote.data.local.entities.MateriaEntity
 import com.example.notespote.data.local.entities.SyncStatus
 import com.example.notespote.data.remote.dto.MateriaDto
-import com.example.notespote.data.model.Materia
+import com.example.notespote.domain.model.Materia
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class MateriaMapper @Inject constructor() {
 
-    fun toDomain(entity: MateriaEntity): Materia {
-        return Materia(
+    fun toDomain(entity: MateriaEntity): com.example.notespote.domain.model.Materia {
+        return _root_ide_package_.com.example.notespote.domain.model.Materia(
             id = entity.idMateria,
             nombreMateria = entity.nombreMateria,
             categoria = entity.categoria,
@@ -20,7 +20,7 @@ class MateriaMapper @Inject constructor() {
         )
     }
 
-    fun toEntity(domain: Materia): MateriaEntity {
+    fun toEntity(domain: com.example.notespote.domain.model.Materia): MateriaEntity {
         return MateriaEntity(
             idMateria = domain.id,
             nombreMateria = domain.nombreMateria,

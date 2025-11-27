@@ -1,4 +1,4 @@
-package com.example.notespote.data.model
+package com.example.notespote.domain.model
 
 data class EstadisticasUsuario(
     val totalApuntes: Int = 0,
@@ -8,6 +8,6 @@ data class EstadisticasUsuario(
     val totalSeguidores: Int = 0,
     val totalSeguidos: Int = 0,
     val totalCarpetas: Int = 0,
-    val materiasMasUsadas: List<Materia> = emptyList(),
-    val etiquetasMasUsadas: List<Etiqueta> = emptyList()
+    val materiasMasUsadas: List<com.example.notespote.domain.model.Materia> = emptyList(),
+    val etiquetasMasUsadas: List<com.example.notespote.domain.model.Etiqueta> = emptyList()
 )

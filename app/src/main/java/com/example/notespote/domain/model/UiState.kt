@@ -1,4 +1,4 @@
-package com.example.notespote.data.model
+package com.example.notespote.domain.model
 
 sealed class UiState<out T> {
     object Idle : UiState<Nothing>()

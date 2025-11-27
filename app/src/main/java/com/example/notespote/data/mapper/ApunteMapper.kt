@@ -12,8 +12,8 @@ import javax.inject.Singleton
 @Singleton
 class ApunteMapper @Inject constructor() {
 
-    fun toDomain(entity: ApunteEntity): Apunte {
-        return Apunte(
+    fun toDomain(entity: ApunteEntity): com.example.notespote.domain.model.Apunte {
+        return _root_ide_package_.com.example.notespote.domain.model.Apunte(
             id = entity.idApunte,
             idUsuario = entity.idUsuario,
             idMateria = entity.idMateria,
@@ -34,7 +34,7 @@ class ApunteMapper @Inject constructor() {
         )
     }
 
-    fun toEntity(domain: Apunte): ApunteEntity {
+    fun toEntity(domain: com.example.notespote.domain.model.Apunte): ApunteEntity {
         return ApunteEntity(
             idApunte = domain.id,
             idUsuario = domain.idUsuario,
@@ -113,8 +113,8 @@ class ApunteMapper @Inject constructor() {
         postitMapper: PostitMapper,
         archivoMapper: ArchivoAdjuntoMapper,
         etiquetaMapper: EtiquetaMapper
-    ): ApunteDetallado {
-        return ApunteDetallado(
+    ): com.example.notespote.domain.model.ApunteDetallado {
+        return _root_ide_package_.com.example.notespote.domain.model.ApunteDetallado(
             apunte = toDomain(apunteWithDetails.apunte),
             postits = apunteWithDetails.postits.map { postitMapper.toDomain(it) },
             archivos = apunteWithDetails.archivos.map { archivoMapper.toDomain(it) },

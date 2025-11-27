@@ -16,9 +16,9 @@ import com.example.notespote.data.mapper.ArchivoAdjuntoMapper
 import com.example.notespote.data.mapper.EtiquetaMapper
 import com.example.notespote.data.mapper.PostitMapper
 import com.example.notespote.data.network.NetworkMonitor
-import com.example.notespote.data.model.Apunte
-import com.example.notespote.data.model.ApunteDetallado
-import com.example.notespote.data.model.FiltroApuntes
+import com.example.notespote.domain.model.Apunte
+import com.example.notespote.domain.model.ApunteDetallado
+import com.example.notespote.domain.model.FiltroApuntes
 import com.example.notespote.domain.repository.ApunteRepository
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
@@ -51,7 +51,7 @@ class ApunteRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context
 ) : ApunteRepository {
 
-    override fun getApuntesByUser(userId: String): Flow<Result<List<Apunte>>> {
+    override fun getApuntesByUser(userId: String): Flow<Result<List<com.example.notespote.domain.model.Apunte>>> {
         // Usamos el constructor flow para tener control total
         return kotlinx.coroutines.flow.flow {
             try {
@@ -71,7 +71,7 @@ class ApunteRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun getApuntesByFolder(folderId: String): Flow<Result<List<Apunte>>> {
+    override fun getApuntesByFolder(folderId: String): Flow<Result<List<com.example.notespote.domain.model.Apunte>>> {
         return apunteDao.getApuntesByFolder(folderId)
             .map { entities ->
                 Result.success(entities.map { apunteMapper.toDomain(it) })
@@ -81,7 +81,7 @@ class ApunteRepositoryImpl @Inject constructor(
             }
     }
 
-    override fun getApunteById(id: String): Flow<Result<ApunteDetallado>> {
+    override fun getApunteById(id: String): Flow<Result<com.example.notespote.domain.model.ApunteDetallado>> {
         return kotlinx.coroutines.flow.flow {
             val apunteWithDetails = apunteDao.getApunteWithDetails(id)
             if (apunteWithDetails != null) {
@@ -101,7 +101,7 @@ class ApunteRepositoryImpl @Inject constructor(
     }
 
     override suspend fun createApunte(
-        apunte: Apunte,
+        apunte: com.example.notespote.domain.model.Apunte,
         archivos: List<Uri>
     ): Result<String> = withContext(Dispatchers.IO) {
         try {
@@ -147,7 +147,7 @@ class ApunteRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun updateApunte(apunte: Apunte): Result<Unit> = withContext(Dispatchers.IO) {
+    override suspend fun updateApunte(apunte: com.example.notespote.domain.model.Apunte): Result<Unit> = withContext(Dispatchers.IO) {
         try {
             val entity = apunteMapper.toEntity(apunte).copy(
                 syncStatus = SyncStatus.PENDING_UPDATE,
@@ -229,7 +229,7 @@ class ApunteRepositoryImpl @Inject constructor(
         TODO("Not yet implemented")
     }
 
-    override fun getPublicApuntes(limit: Int): Flow<Result<List<Apunte>>> {
+    override fun getPublicApuntes(limit: Int): Flow<Result<List<com.example.notespote.domain.model.Apunte>>> {
         return apunteDao.getPublicApuntes(limit)
             .map { entities ->
                 Result.success(entities.map { apunteMapper.toDomain(it) })
@@ -239,7 +239,7 @@ class ApunteRepositoryImpl @Inject constructor(
             }
     }
 
-    override fun searchApuntes(filtro: FiltroApuntes): Flow<Result<List<Apunte>>> {
+    override fun searchApuntes(filtro: com.example.notespote.domain.model.FiltroApuntes): Flow<Result<List<com.example.notespote.domain.model.Apunte>>> {
         TODO("Not yet implemented")
     }
 

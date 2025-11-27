@@ -1,9 +1,9 @@
 package com.example.notespote.domain.repository
 
 import android.net.Uri
-import com.example.notespote.data.model.Apunte
-import com.example.notespote.data.model.ApunteDetallado
-import com.example.notespote.data.model.FiltroApuntes
+import com.example.notespote.domain.model.Apunte
+import com.example.notespote.domain.model.ApunteDetallado
+import com.example.notespote.domain.model.FiltroApuntes
 import kotlinx.coroutines.flow.Flow
 
 interface ApunteRepository {

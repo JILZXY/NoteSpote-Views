@@ -3,7 +3,7 @@ package com.example.notespote.data.mapper
 import com.example.notespote.data.local.entities.SyncStatus
 import com.example.notespote.data.local.entities.UsuarioEntity
 import com.example.notespote.data.remote.dto.UsuarioDto
-import com.example.notespote.data.model.Usuario
+import com.example.notespote.domain.model.Usuario
 import com.google.firebase.Timestamp
 import java.util.Date
 import javax.inject.Inject
@@ -12,8 +12,8 @@ import javax.inject.Singleton
 @Singleton
 class UsuarioMapper @Inject constructor() {
 
-    fun toDomain(entity: UsuarioEntity): Usuario {
-        return Usuario(
+    fun toDomain(entity: UsuarioEntity): com.example.notespote.domain.model.Usuario {
+        return _root_ide_package_.com.example.notespote.domain.model.Usuario(
             id = entity.idUsuario,
             nombre = entity.nombre,
             apellido = entity.apellido,
@@ -29,7 +29,7 @@ class UsuarioMapper @Inject constructor() {
         )
     }
 
-    fun toEntity(domain: Usuario): UsuarioEntity {
+    fun toEntity(domain: com.example.notespote.domain.model.Usuario): UsuarioEntity {
         return UsuarioEntity(
             idUsuario = domain.id,
             nombre = domain.nombre,

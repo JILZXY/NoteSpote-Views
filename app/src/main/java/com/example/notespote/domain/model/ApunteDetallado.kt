@@ -1,9 +1,9 @@
-package com.example.notespote.data.model
+package com.example.notespote.domain.model
 
 data class ApunteDetallado(
-    val apunte: Apunte,
-    val postits: List<Postit> = emptyList(),
-    val archivos: List<ArchivoAdjunto> = emptyList(),
-    val etiquetas: List<Etiqueta> = emptyList(),
-    val autor: Usuario? = null
+    val apunte: com.example.notespote.domain.model.Apunte,
+    val postits: List<com.example.notespote.domain.model.Postit> = emptyList(),
+    val archivos: List<com.example.notespote.domain.model.ArchivoAdjunto> = emptyList(),
+    val etiquetas: List<com.example.notespote.domain.model.Etiqueta> = emptyList(),
+    val autor: com.example.notespote.domain.model.Usuario? = null
 )

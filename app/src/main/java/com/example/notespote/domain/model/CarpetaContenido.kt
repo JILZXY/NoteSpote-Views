@@ -1,8 +1,8 @@
-package com.example.notespote.data.model
+package com.example.notespote.domain.model
 
 data class CarpetaContenido(
-    val carpeta: Carpeta,
-    val subcarpetas: List<Carpeta> = emptyList(),
-    val apuntes: List<Apunte> = emptyList(),
+    val carpeta: com.example.notespote.domain.model.Carpeta,
+    val subcarpetas: List<com.example.notespote.domain.model.Carpeta> = emptyList(),
+    val apuntes: List<com.example.notespote.domain.model.Apunte> = emptyList(),
     val totalItems: Int = subcarpetas.size + apuntes.size
 )
