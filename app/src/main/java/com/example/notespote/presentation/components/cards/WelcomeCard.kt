@@ -16,6 +16,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -30,9 +35,12 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.notespote.R
+import com.example.notespote.presentation.theme.Celeste
 import com.example.notespote.presentation.theme.RichBlack
 import com.example.notespote.presentation.theme.SyneMonoFamily
 import com.example.notespote.presentation.theme.UrbanistFamily
+import com.example.notespote.presentation.theme.VioletWeb
+import com.example.notespote.presentation.theme.YellowOrange
 
 @Composable
 fun WelcomeCard(

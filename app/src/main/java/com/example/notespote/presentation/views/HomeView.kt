@@ -1,4 +1,4 @@
-package com.example.notespote.presentation.views
+package com.example.notespot.presentation.views
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -27,6 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.notespot.presentation.components.buttons.FloatingActionButtons
 import com.example.notespote.presentation.components.cards.WelcomeCard
 import com.example.notespote.presentation.theme.Celeste
 import com.example.notespote.presentation.theme.RichBlack
@@ -39,6 +40,7 @@ fun HomeView(
     onProfileClick: () -> Unit,
     onAddNoteClick: () -> Unit,
     onCreateFolderClick: () -> Unit,
+    onMenuClick: () -> Unit,
     onNotificationsClick: () -> Unit
 ) {
     Box(
@@ -54,7 +56,7 @@ fun HomeView(
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween, // Use SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(
@@ -139,5 +141,13 @@ fun HomeView(
                 )
             }
         }
+
+        FloatingActionButtons(
+            onAddNoteClick = onAddNoteClick,
+            onCreateFolderClick = onCreateFolderClick,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(end = 24.dp, bottom = 100.dp)
+        )
     }
 }

@@ -67,7 +67,7 @@ fun NavManager() {
 
         composable(Routes.Register.route) {
             RegisterView (
-                onRegisterClick = {
+                onRegisterSuccess = {
                     navController.navigate(Routes.Home.route) {
                         popUpTo(Routes.Register.route) { inclusive = true }
                     }

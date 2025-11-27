@@ -1,4 +1,4 @@
-package com.example.notespote.presentation.components.buttons
+package com.example.notespot.presentation.components.buttons
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.spring
@@ -11,6 +11,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Create
+import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Email
@@ -95,18 +99,32 @@ fun FloatingActionButtons(
 
         FloatingActionButton(
             onClick = {
-                isExpanded = !isExpanded
+                onAddNoteClick()
+                isExpanded = false
             },
-            modifier = Modifier.size(64.dp),
+            modifier = Modifier.size(56.dp),
             shape = CircleShape,
-            containerColor = containerColor
+            containerColor = Color.White
         ) {
             Icon(
-                imageVector = icon,
-                contentDescription = if (isExpanded) "Close menu" else "Open menu",
-                tint = iconTint,
-                modifier = Modifier.size(32.dp)
+                imageVector = Icons.Default.Create,
+                contentDescription = null,
+                tint = RichBlack
             )
         }
     }
-}
+
+        FloatingActionButton(
+            onClick = { isExpanded = !isExpanded },
+            modifier = Modifier.size(64.dp),
+            shape = CircleShape,
+            containerColor = Celeste
+        ) {
+            Icon(
+                imageVector = if (isExpanded) Icons.Default.Close else Icons.Default.Add,
+                contentDescription = null,
+                tint = RichBlack,
+                modifier = Modifier.size(32.dp)
+            )
+                }
+    }
