@@ -1,23 +1,41 @@
 package com.example.notespote.domain.usecases.notes
 
-import com.example.notespote.domain.model.SesionUsuario
+import android.net.Uri
+import com.example.notespote.data.local.entities.TipoVisibilidad
+import com.example.notespote.domain.model.Apunte
+import com.example.notespote.domain.repository.ApunteRepository
 import com.example.notespote.domain.repository.AuthRepository
 import javax.inject.Inject
 
-class LoginUseCase @Inject constructor(
+class CreateApunteUseCase @Inject constructor(
+    private val apunteRepository: ApunteRepository,
     private val authRepository: AuthRepository
 ) {
-    suspend operator fun invoke(email: String, password: String): Result<SesionUsuario> {
-        if (email.isBlank()) {
-            return Result.failure(Exception("El email no puede estar vacío"))
-        }
-        if (password.isBlank()) {
-            return Result.failure(Exception("La contraseña no puede estar vacía"))
-        }
-        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            return Result.failure(Exception("El email no es válido"))
+    suspend operator fun invoke(
+        titulo: String,
+        contenido: String?,
+        idCarpeta: String?,
+        idMateria: String?,
+        tipoVisibilidad: TipoVisibilidad,
+        archivos: List<Uri>
+    ): Result<String> {
+        val userId = authRepository.getCurrentUserId()
+            ?: return Result.failure(Exception("Usuario no autenticado"))
+
+        if (titulo.isBlank()) {
+            return Result.failure(Exception("El título no puede estar vacío"))
         }
 
-        return authRepository.login(email, password)
+        val apunte = Apunte(
+            idUsuario = userId,
+            titulo = titulo,
+            contenido = contenido,
+            idCarpeta = idCarpeta,
+            idMateria = idMateria,
+            tipoVisibilidad = tipoVisibilidad,
+            tieneImagenes = archivos.isNotEmpty()
+        )
+
+        return apunteRepository.createApunte(apunte, archivos)
     }
 }
