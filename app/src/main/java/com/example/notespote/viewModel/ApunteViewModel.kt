@@ -33,7 +33,7 @@ class ApunteViewModel @Inject constructor(
         }
     }
 
-    fun createApunte(apunte: com.example.notespote.domain.model.Apunte, archivos: List<Uri>) {
+    fun createApunte(apunte: Apunte, archivos: List<Uri>) {
         viewModelScope.launch {
             _uiState.value = ApunteUiState.Loading
             val result = apunteRepository.createApunte(apunte, archivos)
@@ -54,7 +54,7 @@ class ApunteViewModel @Inject constructor(
 
 sealed class ApunteUiState {
     object Loading : ApunteUiState()
-    data class Success(val apuntes: List<com.example.notespote.domain.model.Apunte>) : ApunteUiState()
+    data class Success(val apuntes: List<Apunte>) : ApunteUiState()
     data class Created(val apunteId: String) : ApunteUiState()
     data class Error(val message: String?) : ApunteUiState()
 }
