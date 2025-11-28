@@ -5,9 +5,9 @@ import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.notespote.data.local.entities.TipoVisibilidad
 import com.example.notespote.domain.model.Apunte
 import com.example.notespote.domain.model.ApunteDetallado
-import com.example.notespote.domain.model.TipoVisibilidad
 import com.example.notespote.domain.usecases.notes.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
