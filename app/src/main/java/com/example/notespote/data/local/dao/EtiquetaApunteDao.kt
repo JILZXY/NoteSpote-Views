@@ -65,4 +65,7 @@ interface EtiquetaApunteDao {
 
     @Query("DELETE FROM etiqueta_apunte WHERE id_etiqueta = :etiquetaId")
     suspend fun deleteByEtiqueta(etiquetaId: String)
+
+    @Query("DELETE FROM etiqueta_apunte WHERE id_apunte = :apunteId AND id_etiqueta = :etiquetaId")
+    suspend fun deleteByApunteAndEtiqueta(apunteId: String, etiquetaId: String)
 }
