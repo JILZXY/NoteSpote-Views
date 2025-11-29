@@ -11,7 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.notespot.presentation.theme.*
+import com.example.notespote.presentation.theme.*
 import com.example.notespote.presentation.theme.Celeste
 import com.example.notespote.presentation.theme.RichBlack
 
