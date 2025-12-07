@@ -24,26 +24,37 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.notespote.domain.model.Carpeta
 import com.example.notespote.presentation.components.cards.FolderCard
 import com.example.notespote.presentation.components.cards.FolderCardData
+import com.example.notespote.presentation.components.dialogs.DeleteFolderDialog
 import com.example.notespote.presentation.theme.Celeste
 import com.example.notespote.presentation.theme.OutfitFamily
 import com.example.notespote.presentation.theme.RichBlack
+import com.example.notespote.viewModel.CarpetaViewModel
 import com.example.notespote.viewModel.HomeViewModel
 
 @Composable
 fun AllFoldersView(
     onBackClick: () -> Unit,
     onFolderClick: () -> Unit,
-    viewModel: HomeViewModel
+    viewModel: HomeViewModel,
+    carpetaViewModel: CarpetaViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+
+    var folderToDelete by remember { mutableStateOf<Carpeta?>(null) }
+    var folderToUpdate by remember { mutableStateOf<Carpeta?>(null) }
 
     // Carpetas predeterminadas
     val defaultFolders = listOf(
@@ -52,7 +63,7 @@ fun AllFoldersView(
         FolderCardData("Todos los archivos", Color(0xFFFD99FF), Icons.Default.Folder)
     )
 
-    // Convertir carpetas del usuario a FolderCardData
+    // Convertir carpetas del usuario a pares (Carpeta, FolderCardData)
     val userFolders = uiState.recentFolders.map { carpeta ->
         val colorHex = carpeta.colorCarpeta?.removePrefix("#") ?: "FFB347"
         val color = try {
@@ -60,11 +71,11 @@ fun AllFoldersView(
         } catch (e: Exception) {
             Color(0xFFFFB347)
         }
-        FolderCardData(carpeta.nombreCarpeta ?: "Sin nombre", color, null)
+        carpeta to FolderCardData(carpeta.nombreCarpeta, color, null)
     }
 
     // Combinar carpetas: primero predeterminadas, luego del usuario
-    val allFolders = defaultFolders + userFolders
+    val allFolders = defaultFolders.map { null to it } + userFolders
 
     Column(
         modifier = Modifier
@@ -100,9 +111,38 @@ fun AllFoldersView(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            items(allFolders) { folder ->
-                FolderCard(folder = folder)
+            items(allFolders) { (carpeta, folderData) ->
+                FolderCard(
+                    folder = folderData,
+                    onClick = { onFolderClick() },
+                    onRename = carpeta?.let { { folderToUpdate = it } },
+                    onDelete = carpeta?.let { { folderToDelete = it } }
+                )
             }
         }
+    }
+
+    // Diálogo de eliminar
+    folderToDelete?.let { carpeta ->
+        DeleteFolderDialog(
+            folderName = carpeta.nombreCarpeta,
+            onConfirm = {
+                carpetaViewModel.deleteCarpeta(carpeta.id)
+                folderToDelete = null
+            },
+            onDismiss = { folderToDelete = null }
+        )
+    }
+
+    // Diálogo de actualizar carpeta
+    folderToUpdate?.let { carpeta ->
+        UpdateFolderView(
+            carpeta = carpeta,
+            onUpdateFolder = { updatedCarpeta ->
+                carpetaViewModel.updateCarpeta(updatedCarpeta)
+                folderToUpdate = null
+            },
+            onDismiss = { folderToUpdate = null }
+        )
     }
 }

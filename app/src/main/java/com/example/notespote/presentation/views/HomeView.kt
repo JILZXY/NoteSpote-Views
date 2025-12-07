@@ -28,6 +28,9 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,15 +39,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.notespot.presentation.components.buttons.FloatingActionButtons
+import com.example.notespote.domain.model.Carpeta
 import com.example.notespote.presentation.components.cards.FolderCard
 import com.example.notespote.presentation.components.cards.FolderCardData
 import com.example.notespote.presentation.components.cards.WelcomeCard
+import com.example.notespote.presentation.components.dialogs.DeleteFolderDialog
 import com.example.notespote.presentation.theme.Celeste
 import com.example.notespote.presentation.theme.OutfitFamily
 import com.example.notespote.presentation.theme.RichBlack
 import com.example.notespote.presentation.theme.SyneMonoFamily
 import com.example.notespote.presentation.theme.UrbanistFamily
+import com.example.notespote.presentation.views.UpdateFolderView
+import com.example.notespote.viewModel.CarpetaViewModel
 import com.example.notespote.viewModel.HomeViewModel
 
 @Composable
@@ -54,9 +62,13 @@ fun HomeView(
     onCreateFolderClick: () -> Unit,
     onNotificationsClick: () -> Unit,
     onSeeAllFoldersClick: () -> Unit,
-    viewModel: HomeViewModel
+    viewModel: HomeViewModel,
+    carpetaViewModel: CarpetaViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+
+    var folderToDelete by remember { mutableStateOf<Carpeta?>(null) }
+    var folderToUpdate by remember { mutableStateOf<Carpeta?>(null) }
 
     // Carpetas predeterminadas
     val defaultFolders = listOf(
@@ -65,7 +77,7 @@ fun HomeView(
         FolderCardData("Todos los archivos", Color(0xFFFD99FF), Icons.Default.Folder)
     )
 
-    // Convertir carpetas del usuario a FolderCardData (solo las primeras 5 para HomeView)
+    // Convertir carpetas del usuario a pares (Carpeta, FolderCardData) (solo las primeras 5 para HomeView)
     val userFolders = uiState.recentFolders.take(5).map { carpeta ->
         val colorHex = carpeta.colorCarpeta?.removePrefix("#") ?: "FFB347"
         val color = try {
@@ -73,11 +85,11 @@ fun HomeView(
         } catch (e: Exception) {
             Color(0xFFFFB347)
         }
-        FolderCardData(carpeta.nombreCarpeta ?: "Sin nombre", color, null)
+        carpeta to FolderCardData(carpeta.nombreCarpeta, color, null)
     }
 
     // Combinar carpetas: primero predeterminadas, luego del usuario (máximo 5)
-    val allFolders = defaultFolders + userFolders
+    val allFolders = defaultFolders.map { null to it } + userFolders
 
     if (uiState.isLoading) {
         Box(
@@ -222,10 +234,13 @@ fun HomeView(
                     LazyRow(
                         horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        items(allFolders) { folder ->
-                            Box(modifier = Modifier.clickable { /* TODO: onClick */ }) {
-                                FolderCard(folder = folder)
-                            }
+                        items(allFolders) { (carpeta, folderData) ->
+                            FolderCard(
+                                folder = folderData,
+                                onClick = { /* TODO: onClick */ },
+                                onRename = carpeta?.let { { folderToUpdate = it } },
+                                onDelete = carpeta?.let { { folderToDelete = it } }
+                            )
                         }
                     }
                 }
@@ -239,5 +254,29 @@ fun HomeView(
                     .padding(end = 24.dp, bottom = 100.dp)
             )
         }
+    }
+
+    // Diálogo de eliminar
+    folderToDelete?.let { carpeta ->
+        DeleteFolderDialog(
+            folderName = carpeta.nombreCarpeta,
+            onConfirm = {
+                carpetaViewModel.deleteCarpeta(carpeta.id)
+                folderToDelete = null
+            },
+            onDismiss = { folderToDelete = null }
+        )
+    }
+
+    // Diálogo de actualizar carpeta
+    folderToUpdate?.let { carpeta ->
+        UpdateFolderView(
+            carpeta = carpeta,
+            onUpdateFolder = { updatedCarpeta ->
+                carpetaViewModel.updateCarpeta(updatedCarpeta)
+                folderToUpdate = null
+            },
+            onDismiss = { folderToUpdate = null }
+        )
     }
 }

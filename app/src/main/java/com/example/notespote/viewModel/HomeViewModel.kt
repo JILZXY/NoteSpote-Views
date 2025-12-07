@@ -27,8 +27,35 @@ class HomeViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
+    private var currentUserId: String? = null
+
     init {
         loadHomeData()
+        observeCarpetas()
+    }
+
+    private fun observeCarpetas() {
+        viewModelScope.launch {
+            // Primero obtenemos el usuario
+            getCurrentUserUseCase().collect { userResult ->
+                userResult.onSuccess { usuario ->
+                    if (usuario != null && usuario.id != currentUserId) {
+                        currentUserId = usuario.id
+                        // Ahora observamos las carpetas continuamente
+                        getCarpetasRaizUseCase(usuario.id).collect { carpetasResult ->
+                            carpetasResult.onSuccess { carpetas ->
+                                android.util.Log.d("HomeViewModel", "Carpetas actualizadas: ${carpetas.size} items")
+                                _uiState.value = _uiState.value.copy(
+                                    recentFolders = carpetas,
+                                    isLoading = false
+                                )
+                                updateHasContent()
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     fun loadHomeData() {
@@ -46,6 +73,9 @@ class HomeViewModel @Inject constructor(
                     // Tenemos un usuario, cargamos sus datos
                     val userId = usuario.id
                     val userName = usuario.nombre ?: usuario.nombreUsuario
+
+                    // Actualizar nombre de usuario
+                    _uiState.value = _uiState.value.copy(userName = userName)
 
                     // Cargar carpetas
                     android.util.Log.d("HomeViewModel", "Loading carpetas for userId: $userId")
