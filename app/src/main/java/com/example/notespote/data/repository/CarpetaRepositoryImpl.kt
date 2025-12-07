@@ -108,18 +108,26 @@ class CarpetaRepositoryImpl @Inject constructor(
 
     override suspend fun createCarpeta(carpeta: Carpeta): Result<String> = withContext(Dispatchers.IO) {
         try {
+            Log.d("CarpetaRepository", "createCarpeta started for: ${carpeta.nombreCarpeta}")
             val carpetaId = UUID.randomUUID().toString()
             val entity = carpetaMapper.toEntity(carpeta).copy(
                 idCarpeta = carpetaId,
                 syncStatus = SyncStatus.PENDING_UPLOAD
             )
 
+            Log.d("CarpetaRepository", "Inserting carpeta entity into database")
             carpetaDao.insert(entity)
+            Log.d("CarpetaRepository", "Carpeta inserted successfully with ID: $carpetaId")
 
             if (networkMonitor.isCurrentlyConnected()) {
+                Log.d("CarpetaRepository", "Network connected, syncing carpeta")
                 syncCarpeta(carpetaId)
+                Log.d("CarpetaRepository", "Carpeta synced successfully")
+            } else {
+                Log.d("CarpetaRepository", "Network not connected, skipping sync")
             }
 
+            Log.d("CarpetaRepository", "Returning success result")
             Result.success(carpetaId)
         } catch (e: Exception) {
             Log.e("CarpetaRepository", "Error creating carpeta", e)

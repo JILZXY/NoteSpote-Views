@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface EtiquetaRepository {
     fun getAllEtiquetas(): Flow<Result<List<Etiqueta>>>
+    fun getEtiquetaById(etiquetaId: String): Flow<Result<Etiqueta>>
     fun getEtiquetasByApunte(apunteId: String): Flow<Result<List<Etiqueta>>>
     fun getTopEtiquetas(limit: Int): Flow<Result<List<Etiqueta>>>
     fun searchEtiquetas(query: String, limit: Int): Flow<Result<List<Etiqueta>>>

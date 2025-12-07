@@ -39,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -223,7 +224,10 @@ fun NewFolderView(
                                 if (title.isBlank()) {
                                     titleError = "El título no puede estar vacío"
                                 } else {
-                                    val newFolder = Folder(title, "#${selectedColor.value.toULong().toString(16).padStart(8, '0')}", isPublic)
+                                    // Convertir color a formato hexadecimal correcto (ARGB)
+                                    val colorHex = selectedColor.toArgb().toUInt().toString(16).padStart(8, '0')
+                                    android.util.Log.d("NewFolderView", "Selected color ARGB: #$colorHex")
+                                    val newFolder = Folder(title, "#$colorHex", isPublic)
                                     onCreateFolder(newFolder)
                                     createdFolderData = newFolder
                                     showSuccessDialog = true

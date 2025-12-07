@@ -3,7 +3,7 @@ package com.example.notespote.data.mapper
 import com.example.notespote.data.local.entities.PostitEntity
 import com.example.notespote.data.local.entities.SyncStatus
 import com.example.notespote.data.remote.dto.PostitDto
-import com.example.notespote.data.model.*
+import com.example.notespote.data.*
 import com.google.firebase.Timestamp
 import java.util.Date
 import javax.inject.Inject

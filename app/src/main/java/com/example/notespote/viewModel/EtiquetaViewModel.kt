@@ -15,6 +15,7 @@ import javax.inject.Inject
 @HiltViewModel
 class EtiquetaViewModel @Inject constructor(
     private val getEtiquetasByApunteUseCase: GetEtiquetasByApunteUseCase,
+    private val getEtiquetaByIdUseCase: GetEtiquetaByIdUseCase,
     private val searchEtiquetasUseCase: SearchEtiquetasUseCase,
     private val agregarEtiquetaAApunteUseCase: AgregarEtiquetaAApunteUseCase,
     private val removerEtiquetaDeApunteUseCase: RemoverEtiquetaDeApunteUseCase,
@@ -27,8 +28,26 @@ class EtiquetaViewModel @Inject constructor(
     private val _etiquetas = MutableStateFlow<List<Etiqueta>>(emptyList())
     val etiquetas: StateFlow<List<Etiqueta>> = _etiquetas.asStateFlow()
 
+    private val _etiqueta = MutableStateFlow<Etiqueta?>(null)
+    val etiqueta: StateFlow<Etiqueta?> = _etiqueta.asStateFlow()
+
     private val _searchResults = MutableStateFlow<List<Etiqueta>>(emptyList())
     val searchResults: StateFlow<List<Etiqueta>> = _searchResults.asStateFlow()
+
+    fun getEtiquetaById(etiquetaId: String) {
+        viewModelScope.launch {
+            _uiState.value = EtiquetaUiState.Loading
+
+            getEtiquetaByIdUseCase(etiquetaId).collect { result ->
+                result.onSuccess { etiqueta ->
+                    _etiqueta.value = etiqueta
+                    _uiState.value = EtiquetaUiState.SuccessEtiqueta
+                }.onFailure { error ->
+                    _uiState.value = EtiquetaUiState.Error(error.message ?: "Error al cargar etiqueta")
+                }
+            }
+        }
+    }
 
     fun loadEtiquetasByApunte(apunteId: String) {
         viewModelScope.launch {
@@ -118,6 +137,7 @@ sealed class EtiquetaUiState {
     object Idle : EtiquetaUiState()
     object Loading : EtiquetaUiState()
     object Success : EtiquetaUiState()
+    object SuccessEtiqueta : EtiquetaUiState()
     object Added : EtiquetaUiState()
     object Removed : EtiquetaUiState()
     data class Error(val message: String) : EtiquetaUiState()

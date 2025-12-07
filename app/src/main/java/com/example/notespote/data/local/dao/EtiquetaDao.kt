@@ -18,6 +18,9 @@ interface EtiquetaDao {
     @Query("SELECT * FROM etiqueta WHERE id_etiqueta = :id")
     suspend fun getEtiquetaById(id: String): EtiquetaEntity?
 
+    @Query("SELECT * FROM etiqueta WHERE id_etiqueta = :id")
+    fun getEtiquetaByIdFlow(id: String): Flow<EtiquetaEntity>
+
     @Query("SELECT * FROM etiqueta WHERE nombre_etiqueta = :nombre")
     suspend fun getEtiquetaByNombre(nombre: String): EtiquetaEntity?
 

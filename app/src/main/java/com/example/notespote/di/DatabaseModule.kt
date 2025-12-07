@@ -27,10 +27,32 @@ object DatabaseModule {
     }
 
     @Provides
+    fun provideUsuarioDao(database: NoteSpotDatabase) = database.usuarioDao()
+
+    @Provides
+    fun provideMateriaDao(database: NoteSpotDatabase) = database.materiaDao()
+
+    @Provides
+    fun provideCarpetaDao(database: NoteSpotDatabase) = database.carpetaDao()
+
+    @Provides
     fun provideApunteDao(database: NoteSpotDatabase) = database.apunteDao()
 
     @Provides
-    fun provideArchivoDao(database: NoteSpotDatabase) = database.archivoAdjuntoDao()
+    fun providePostitDao(database: NoteSpotDatabase) = database.postitDao()
 
-    // ... otros DAOs
+    @Provides
+    fun provideArchivoAdjuntoDao(database: NoteSpotDatabase) = database.archivoAdjuntoDao()
+
+    @Provides
+    fun provideLikeDao(database: NoteSpotDatabase) = database.likeDao()
+
+    @Provides
+    fun provideEtiquetaDao(database: NoteSpotDatabase) = database.etiquetaDao()
+
+    @Provides
+    fun provideEtiquetaApunteDao(database: NoteSpotDatabase) = database.etiquetaApunteDao()
+
+    @Provides
+    fun provideSeguimientoDao(database: NoteSpotDatabase) = database.seguimientoDao()
 }

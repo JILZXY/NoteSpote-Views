@@ -1,6 +1,7 @@
 package com.example.notespote.presentation.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -18,6 +19,7 @@ import com.example.notespote.presentation.views.NotificationsView
 import com.example.notespote.presentation.views.PreloadView
 import com.example.notespote.presentation.views.ProfileView
 import com.example.notespote.presentation.views.UserProfileView
+import com.example.notespote.viewModel.HomeViewModel
 
 @Composable
 fun NavManager() {
@@ -123,9 +125,11 @@ fun NavManager() {
         }
 
         composable(Routes.AllFolders.route) {
+            val homeViewModel: HomeViewModel = hiltViewModel()
             AllFoldersView(
                 onBackClick = { navController.popBackStack() },
-                onFolderClick = { navController.navigate(Routes.FolderDetail.route) }
+                onFolderClick = { navController.navigate(Routes.FolderDetail.route) },
+                viewModel = homeViewModel
             )
         }
 

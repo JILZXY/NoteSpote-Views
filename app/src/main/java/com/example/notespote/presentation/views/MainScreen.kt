@@ -11,15 +11,19 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.notespot.presentation.components.buttons.FloatingActionButtons
+import com.example.notespote.domain.model.Folder
+import com.example.notespote.domain.model.Note
 import com.example.notespote.presentation.components.navigation.BottomNavigationBar
 import com.example.notespote.presentation.navigation.BottomNavItem
 import com.example.notespote.presentation.navigation.Routes
+import com.example.notespote.viewModel.HomeViewModel
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -28,6 +32,8 @@ fun MainScreen(navController: NavController) {
     val bottomNavController = rememberNavController()
     val navBackStackEntry by bottomNavController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+
+    val homeViewModel: HomeViewModel = hiltViewModel()
 
     val navigationItems = listOf(
         BottomNavItem.Search,
@@ -54,13 +60,13 @@ fun MainScreen(navController: NavController) {
         Box(modifier = Modifier.padding(paddingValues)) {
             NavHost(navController = bottomNavController, startDestination = BottomNavItem.Home.route) {
                 composable(BottomNavItem.Home.route) {
-                    HomeViewFilled(
+                    com.example.notespot.presentation.views.HomeView(
                         onProfileClick = { navController.navigate(Routes.Profile.route) },
                         onNotificationsClick = { navController.navigate(Routes.Notifications.route) },
                         onAddNoteClick = { showNoteDialog = true },
                         onCreateFolderClick = { showFolderDialog = true },
                         onSeeAllFoldersClick = { navController.navigate(Routes.AllFolders.route) },
-                        onFolderClick = { navController.navigate(Routes.FolderDetail.route) }
+                        viewModel = homeViewModel
                     )
                 }
                 composable(BottomNavItem.Search.route) {
@@ -76,7 +82,7 @@ fun MainScreen(navController: NavController) {
     if (showNoteDialog) {
         NewNoteView(
             onDismiss = { showNoteDialog = false },
-            onCreateNote = { note ->
+            onCreateNote = { note: Note ->
                 // Here you would typically handle the created note, e.g., pass to a ViewModel
                 showNoteDialog = false
             }
@@ -86,8 +92,10 @@ fun MainScreen(navController: NavController) {
     if (showFolderDialog) {
         NewFolderView(
             onDismiss = { showFolderDialog = false },
-            onCreateFolder = { folder ->
-                // Here you would typically handle the created folder, e.g., pass to a ViewModel
+            onCreateFolder = { folder: Folder ->
+                // Crear la carpeta usando el ViewModel
+                android.util.Log.d("MainScreen", "Creating folder: title=${folder.title}, color=${folder.color}")
+                homeViewModel.createFolder(folder.title, folder.color)
                 showFolderDialog = false
             }
         )

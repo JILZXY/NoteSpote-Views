@@ -40,6 +40,16 @@ class EtiquetaRepositoryImpl @Inject constructor(
             }
     }
 
+    override fun getEtiquetaById(etiquetaId: String): Flow<Result<Etiqueta>> {
+        return etiquetaDao.getEtiquetaByIdFlow(etiquetaId)
+            .map { entity ->
+                Result.success(etiquetaMapper.toDomain(entity))
+            }
+            .catch { e ->
+                emit(Result.failure(e))
+            }
+    }
+
     override fun getEtiquetasByApunte(apunteId: String): Flow<Result<List<Etiqueta>>> {
         return etiquetaApunteDao.getEtiquetasDetalleByApunte(apunteId)
             .map { entities ->

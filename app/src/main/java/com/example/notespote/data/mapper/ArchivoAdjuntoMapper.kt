@@ -2,7 +2,7 @@ package com.example.notespote.data.mapper
 
 import com.example.notespote.data.local.entities.ArchivoAdjuntoEntity
 import com.example.notespote.data.local.entities.SyncStatus
-import com.example.notespote.data.model.*
+import com.example.notespote.data.*
 import javax.inject.Inject
 import javax.inject.Singleton
 

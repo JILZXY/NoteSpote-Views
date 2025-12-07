@@ -18,9 +18,12 @@ import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -29,19 +32,39 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.notespote.presentation.components.cards.FolderCard
 import com.example.notespote.presentation.components.cards.FolderCardData
+import com.example.notespote.presentation.theme.Celeste
 import com.example.notespote.presentation.theme.OutfitFamily
 import com.example.notespote.presentation.theme.RichBlack
+import com.example.notespote.viewModel.HomeViewModel
 
 @Composable
-fun AllFoldersView(onBackClick: () -> Unit, onFolderClick: () -> Unit) {
-    val allFolders = listOf(
+fun AllFoldersView(
+    onBackClick: () -> Unit,
+    onFolderClick: () -> Unit,
+    viewModel: HomeViewModel
+) {
+    val uiState by viewModel.uiState.collectAsState()
+
+    // Carpetas predeterminadas
+    val defaultFolders = listOf(
         FolderCardData("Recientes", Color(0xFF97DECC), Icons.Default.History),
         FolderCardData("Favoritos", Color(0xFFFFF347), Icons.Default.Star),
-        FolderCardData("Todos los archivos", Color(0xFFFD99FF), Icons.Default.Folder),
-        FolderCardData("Universidad", Color(0xFF81D4FA), Icons.Default.Folder),
-        FolderCardData("Trabajo", Color(0xFF4DB6AC), Icons.Default.Folder),
-        FolderCardData("Personal", Color(0xFFDCE775), Icons.Default.Folder)
+        FolderCardData("Todos los archivos", Color(0xFFFD99FF), Icons.Default.Folder)
     )
+
+    // Convertir carpetas del usuario a FolderCardData
+    val userFolders = uiState.recentFolders.map { carpeta ->
+        val colorHex = carpeta.colorCarpeta?.removePrefix("#") ?: "FFB347"
+        val color = try {
+            Color(android.graphics.Color.parseColor("#$colorHex"))
+        } catch (e: Exception) {
+            Color(0xFFFFB347)
+        }
+        FolderCardData(carpeta.nombreCarpeta ?: "Sin nombre", color, null)
+    }
+
+    // Combinar carpetas: primero predeterminadas, luego del usuario
+    val allFolders = defaultFolders + userFolders
 
     Column(
         modifier = Modifier

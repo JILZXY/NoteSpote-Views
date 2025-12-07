@@ -5,7 +5,7 @@ import com.example.notespote.domain.repository.ApunteRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-class GetApuntesByUserUseCase @Inject constructor(
+class GetMyApunteUseCase @Inject constructor(
     private val apunteRepository: ApunteRepository
 ) {
     operator fun invoke(userId: String): Flow<Result<List<Apunte>>> {

@@ -73,7 +73,7 @@ fun SuccessFolderDialog(folderData: Folder, onDismiss: () -> Unit) {
                         modifier = Modifier
                             .size(20.dp)
                             .clip(CircleShape)
-                            .background(Color(android.graphics.Color.parseColor(folderData.colorHex)))
+                            .background(Color(android.graphics.Color.parseColor(folderData.color)))
                     )
                 }
                 Text("Público: ${if (folderData.isPublic) "Sí" else "No"}", fontFamily = OutfitFamily, color = Color.Black)
