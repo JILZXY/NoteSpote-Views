@@ -12,8 +12,8 @@ import javax.inject.Singleton
 @Singleton
 class CarpetaMapper @Inject constructor() {
 
-    fun toDomain(entity: CarpetaEntity): com.example.notespote.domain.model.Carpeta {
-        return _root_ide_package_.com.example.notespote.domain.model.Carpeta(
+    fun toDomain(entity: CarpetaEntity): Carpeta {
+        return Carpeta(
             id = entity.idCarpeta,
             idUsuario = entity.idUsuario,
             idMateria = entity.idMateria,
@@ -26,7 +26,7 @@ class CarpetaMapper @Inject constructor() {
         )
     }
 
-    fun toEntity(domain: com.example.notespote.domain.model.Carpeta): CarpetaEntity {
+    fun toEntity(domain: Carpeta): CarpetaEntity {
         return CarpetaEntity(
             idCarpeta = domain.id,
             idUsuario = domain.idUsuario,

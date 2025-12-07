@@ -5,6 +5,7 @@ import com.example.notespote.data.local.entities.SyncStatus
 import com.example.notespote.data.remote.dto.PostitDto
 import com.example.notespote.data.*
 import com.google.firebase.Timestamp
+import com.example.notespote.domain.model.Postit
 import java.util.Date
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -12,8 +13,8 @@ import javax.inject.Singleton
 @Singleton
 class PostitMapper @Inject constructor() {
 
-    fun toDomain(entity: PostitEntity): com.example.notespote.domain.model.Postit {
-        return _root_ide_package_.com.example.notespote.domain.model.Postit(
+    fun toDomain(entity: PostitEntity): Postit {
+        return Postit(
             id = entity.idPostit,
             idApunte = entity.idApunte,
             titulo = entity.tituloPostit,
@@ -28,7 +29,7 @@ class PostitMapper @Inject constructor() {
         )
     }
 
-    fun toEntity(domain: com.example.notespote.domain.model.Postit): PostitEntity {
+    fun toEntity(domain: Postit): PostitEntity {
         return PostitEntity(
             idPostit = domain.id,
             idApunte = domain.idApunte,

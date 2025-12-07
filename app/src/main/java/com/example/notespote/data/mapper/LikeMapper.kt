@@ -12,8 +12,8 @@ import javax.inject.Singleton
 @Singleton
 class LikeMapper @Inject constructor() {
 
-    fun toDomain(entity: LikeEntity): com.example.notespote.domain.model.Like {
-        return _root_ide_package_.com.example.notespote.domain.model.Like(
+    fun toDomain(entity: LikeEntity): Like {
+        return Like(
             id = entity.idLike,
             idUsuario = entity.idUsuario,
             idApunte = entity.idApunte,
@@ -21,7 +21,7 @@ class LikeMapper @Inject constructor() {
         )
     }
 
-    fun toEntity(domain: com.example.notespote.domain.model.Like): LikeEntity {
+    fun toEntity(domain: Like): LikeEntity {
         return LikeEntity(
             idLike = domain.id,
             idUsuario = domain.idUsuario,

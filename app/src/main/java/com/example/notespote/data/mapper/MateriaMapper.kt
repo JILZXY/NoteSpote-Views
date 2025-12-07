@@ -10,8 +10,8 @@ import javax.inject.Singleton
 @Singleton
 class MateriaMapper @Inject constructor() {
 
-    fun toDomain(entity: MateriaEntity): com.example.notespote.domain.model.Materia {
-        return _root_ide_package_.com.example.notespote.domain.model.Materia(
+    fun toDomain(entity: MateriaEntity): Materia {
+        return Materia(
             id = entity.idMateria,
             nombreMateria = entity.nombreMateria,
             categoria = entity.categoria,
@@ -20,7 +20,7 @@ class MateriaMapper @Inject constructor() {
         )
     }
 
-    fun toEntity(domain: com.example.notespote.domain.model.Materia): MateriaEntity {
+    fun toEntity(domain: Materia): MateriaEntity {
         return MateriaEntity(
             idMateria = domain.id,
             nombreMateria = domain.nombreMateria,

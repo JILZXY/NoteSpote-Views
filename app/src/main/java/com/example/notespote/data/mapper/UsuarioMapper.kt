@@ -12,8 +12,8 @@ import javax.inject.Singleton
 @Singleton
 class UsuarioMapper @Inject constructor() {
 
-    fun toDomain(entity: UsuarioEntity): com.example.notespote.domain.model.Usuario {
-        return _root_ide_package_.com.example.notespote.domain.model.Usuario(
+    fun toDomain(entity: UsuarioEntity): Usuario {
+        return Usuario(
             id = entity.idUsuario,
             nombre = entity.nombre,
             apellido = entity.apellido,
@@ -29,7 +29,7 @@ class UsuarioMapper @Inject constructor() {
         )
     }
 
-    fun toEntity(domain: com.example.notespote.domain.model.Usuario): UsuarioEntity {
+    fun toEntity(domain: Usuario): UsuarioEntity {
         return UsuarioEntity(
             idUsuario = domain.id,
             nombre = domain.nombre,

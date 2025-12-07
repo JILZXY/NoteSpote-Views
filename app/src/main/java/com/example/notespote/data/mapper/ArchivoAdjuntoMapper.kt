@@ -2,6 +2,7 @@ package com.example.notespote.data.mapper
 
 import com.example.notespote.data.local.entities.ArchivoAdjuntoEntity
 import com.example.notespote.data.local.entities.SyncStatus
+import com.example.notespote.domain.model.ArchivoAdjunto
 import com.example.notespote.data.*
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -9,8 +10,8 @@ import javax.inject.Singleton
 @Singleton
 class ArchivoAdjuntoMapper @Inject constructor() {
 
-    fun toDomain(entity: ArchivoAdjuntoEntity): com.example.notespote.domain.model.ArchivoAdjunto {
-        return _root_ide_package_.com.example.notespote.domain.model.ArchivoAdjunto(
+    fun toDomain(entity: ArchivoAdjuntoEntity): ArchivoAdjunto {
+        return ArchivoAdjunto(
             id = entity.idArchivo,
             idApunte = entity.idApunte,
             nombreArchivo = entity.nombreArchivo,
@@ -23,7 +24,7 @@ class ArchivoAdjuntoMapper @Inject constructor() {
         )
     }
 
-    fun toEntity(domain: com.example.notespote.domain.model.ArchivoAdjunto): ArchivoAdjuntoEntity {
+    fun toEntity(domain: ArchivoAdjunto): ArchivoAdjuntoEntity {
         return ArchivoAdjuntoEntity(
             idArchivo = domain.id,
             idApunte = domain.idApunte,
