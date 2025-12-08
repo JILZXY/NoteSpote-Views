@@ -1,6 +1,7 @@
 package com.example.notespote.presentation.components.cards
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -41,8 +42,19 @@ data class NoteCardData(
 )
 
 @Composable
-fun NoteCard(note: NoteCardData) {
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+fun NoteCard(note: NoteCardData, onClick: (() -> Unit)? = null) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .let { modifier ->
+                if (onClick != null) {
+                    modifier.clickable { onClick() }
+                } else {
+                    modifier
+                }
+            },
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
         // Left Column for Text Content
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             // Top Row: Title, Hashtags, More Icon

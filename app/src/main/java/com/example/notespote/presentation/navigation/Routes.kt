@@ -15,4 +15,7 @@ sealed class Routes(val route: String) {
     object UserProfile : Routes("user_profile")
     object AllFolders : Routes("all_folders")
     object FolderDetail : Routes("folder_detail")
+    object NoteContent : Routes("note_content/{apunteId}") {
+        fun createRoute(apunteId: String) = "note_content/$apunteId"
+    }
 }

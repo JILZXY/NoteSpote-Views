@@ -1,6 +1,9 @@
 package com.example.notespote.presentation.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -15,10 +18,12 @@ import com.example.notespote.presentation.views.FolderDetailView
 import com.example.notespote.presentation.views.LoadView
 import com.example.notespote.presentation.views.MainScreen
 import com.example.notespote.presentation.views.MyProfileView
+import com.example.notespote.presentation.views.NoteContentView
 import com.example.notespote.presentation.views.NotificationsView
 import com.example.notespote.presentation.views.PreloadView
 import com.example.notespote.presentation.views.ProfileView
 import com.example.notespote.presentation.views.UserProfileView
+import com.example.notespote.viewModel.ApunteViewModel
 import com.example.notespote.viewModel.HomeViewModel
 
 @Composable
@@ -135,6 +140,48 @@ fun NavManager() {
 
         composable(Routes.FolderDetail.route) {
             FolderDetailView(onBackClick = { navController.popBackStack() })
+        }
+
+        composable(Routes.NoteContent.route) { backStackEntry ->
+            val apunteId = backStackEntry.arguments?.getString("apunteId") ?: return@composable
+            val apunteViewModel: ApunteViewModel = hiltViewModel()
+
+            // Set the apunteId to trigger the flow
+            LaunchedEffect(apunteId) {
+                apunteViewModel.setApunteId(apunteId)
+            }
+
+            val apunteDetallado by apunteViewModel.apunteDetallado.collectAsState()
+
+            apunteDetallado?.let { detalle: com.example.notespote.domain.model.ApunteDetallado ->
+                NoteContentView(
+                    apunteDetallado = detalle,
+                    onBackClick = { navController.popBackStack() },
+                    onEditClick = { /* User clicked edit button */ },
+                    onSaveClick = { titulo, contenido, tags ->
+                        // Update apunte with new title and content
+                        val updatedApunte = detalle.apunte.copy(
+                            titulo = titulo,
+                            contenido = contenido
+                        )
+                        apunteViewModel.updateApunte(updatedApunte)
+                    },
+                    onAddTag = { tagParam ->
+                        // Si empieza con "REMOVE:", es una eliminación
+                        if (tagParam.startsWith("REMOVE:")) {
+                            val etiquetaId = tagParam.removePrefix("REMOVE:")
+                            apunteViewModel.removerEtiqueta(apunteId, etiquetaId)
+                        } else {
+                            // Es una nueva etiqueta a agregar
+                            apunteViewModel.agregarEtiqueta(apunteId, tagParam)
+                        }
+                    },
+                    onAddText = { /* TODO: Implementar agregar texto */ },
+                    onUploadFile = { /* TODO: Implementar subir archivo */ },
+                    onAddImage = { /* TODO: Implementar agregar imagen */ },
+                    onDrawClick = { /* TODO: Implementar modo dibujo */ }
+                )
+            }
         }
     }
 }

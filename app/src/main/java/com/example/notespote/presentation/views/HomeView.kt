@@ -41,11 +41,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.notespot.presentation.components.buttons.FloatingActionButtons
+import com.example.notespote.R
+import com.example.notespote.data.local.entities.TipoVisibilidad
 import com.example.notespote.domain.model.Carpeta
 import com.example.notespote.presentation.components.cards.FolderCard
 import com.example.notespote.presentation.components.cards.FolderCardData
+import com.example.notespote.presentation.components.cards.NoteCard
+import com.example.notespote.presentation.components.cards.NoteCardData
 import com.example.notespote.presentation.components.cards.WelcomeCard
 import com.example.notespote.presentation.components.dialogs.DeleteFolderDialog
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import com.example.notespote.presentation.theme.Celeste
 import com.example.notespote.presentation.theme.OutfitFamily
 import com.example.notespote.presentation.theme.RichBlack
@@ -62,6 +69,7 @@ fun HomeView(
     onCreateFolderClick: () -> Unit,
     onNotificationsClick: () -> Unit,
     onSeeAllFoldersClick: () -> Unit,
+    onNoteClick: (String) -> Unit,
     viewModel: HomeViewModel,
     carpetaViewModel: CarpetaViewModel = hiltViewModel()
 ) {
@@ -241,6 +249,47 @@ fun HomeView(
                                 onRename = carpeta?.let { { folderToUpdate = it } },
                                 onDelete = carpeta?.let { { folderToDelete = it } }
                             )
+                        }
+                    }
+
+                    // Sección de Apuntes Recientes
+                    if (uiState.recentNotes.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(32.dp))
+
+                        Text(
+                            "Apuntes Recientes",
+                            color = Color.White,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = OutfitFamily
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            uiState.recentNotes.forEach { apunte ->
+                                val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                                val formattedDate = try {
+                                    dateFormat.format(Date(apunte.fechaCreacion))
+                                } catch (e: Exception) {
+                                    "Fecha desconocida"
+                                }
+
+                                NoteCard(
+                                    note = NoteCardData(
+                                        title = apunte.titulo,
+                                        description = apunte.contenido ?: "Sin descripción",
+                                        tags = emptyList(), // Las etiquetas se pueden agregar después
+                                        subject = "General", // Se puede obtener de idMateria después
+                                        date = formattedDate,
+                                        isPublic = apunte.tipoVisibilidad == TipoVisibilidad.PUBLICO,
+                                        imageResId = R.drawable.mascot_notespot
+                                    ),
+                                    onClick = { onNoteClick(apunte.id) }
+                                )
+                            }
                         }
                     }
                 }

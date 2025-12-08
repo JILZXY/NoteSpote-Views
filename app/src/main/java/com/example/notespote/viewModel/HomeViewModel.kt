@@ -93,19 +93,18 @@ class HomeViewModel @Inject constructor(
                         android.util.Log.d("HomeViewModel", "UI State updated with ${_uiState.value.recentFolders.size} folders")
                     }
 
-                    // Cargar apuntes - TEMPORALMENTE DESHABILITADO para evitar crash
-                    android.util.Log.d("HomeViewModel", "Skipping apuntes loading (temporarily disabled)")
-                    // val apuntesResult = getMyApunteUseCase(userId).firstOrNull()
-                    // android.util.Log.d("HomeViewModel", "apuntesResult: $apuntesResult")
-                    // apuntesResult?.onSuccess { apuntes ->
-                    //     android.util.Log.d("HomeViewModel", "Apuntes loaded: ${apuntes.size} items")
-                    //     _uiState.value = _uiState.value.copy(
-                    //         recentNotes = apuntes.take(5),
-                    //         userName = userName
-                    //     )
-                    // }
-
-                    updateHasContent()
+                    // Cargar apuntes
+                    getMyApunteUseCase(userId).collect { apuntesResult ->
+                        apuntesResult.onSuccess { apuntes ->
+                            android.util.Log.d("HomeViewModel", "Apuntes loaded: ${apuntes.size} items")
+                            _uiState.value = _uiState.value.copy(
+                                recentNotes = apuntes.take(5)
+                            )
+                            updateHasContent()
+                        }.onFailure { error ->
+                            android.util.Log.e("HomeViewModel", "Error loading apuntes: ${error.message}")
+                        }
+                    }
                 } else {
                     android.util.Log.w("HomeViewModel", "No current user found")
                     // No hay usuario actual, estado por defecto

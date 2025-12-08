@@ -23,6 +23,7 @@ import com.example.notespote.domain.model.Note
 import com.example.notespote.presentation.components.navigation.BottomNavigationBar
 import com.example.notespote.presentation.navigation.BottomNavItem
 import com.example.notespote.presentation.navigation.Routes
+import com.example.notespote.viewModel.ApunteViewModel
 import com.example.notespote.viewModel.HomeViewModel
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -34,6 +35,7 @@ fun MainScreen(navController: NavController) {
     val currentRoute = navBackStackEntry?.destination?.route
 
     val homeViewModel: HomeViewModel = hiltViewModel()
+    val apunteViewModel: ApunteViewModel = hiltViewModel()
 
     val navigationItems = listOf(
         BottomNavItem.Search,
@@ -66,6 +68,9 @@ fun MainScreen(navController: NavController) {
                         onAddNoteClick = { showNoteDialog = true },
                         onCreateFolderClick = { showFolderDialog = true },
                         onSeeAllFoldersClick = { navController.navigate(Routes.AllFolders.route) },
+                        onNoteClick = { apunteId ->
+                            navController.navigate(Routes.NoteContent.createRoute(apunteId))
+                        },
                         viewModel = homeViewModel
                     )
                 }
@@ -83,7 +88,24 @@ fun MainScreen(navController: NavController) {
         NewNoteView(
             onDismiss = { showNoteDialog = false },
             onCreateNote = { note: Note ->
-                // Here you would typically handle the created note, e.g., pass to a ViewModel
+                // Crear el apunte usando el ViewModel
+                android.util.Log.d("MainScreen", "Creating note: title=${note.title}, subject=${note.subject}")
+
+                // Convertir visibilidad a TipoVisibilidad
+                val tipoVisibilidad = if (note.isPublic)
+                    com.example.notespote.data.local.entities.TipoVisibilidad.PUBLICO
+                else
+                    com.example.notespote.data.local.entities.TipoVisibilidad.PRIVADO
+
+                // Crear apunte (sin carpeta ni materia por ahora, se pueden agregar después)
+                apunteViewModel.createApunte(
+                    titulo = note.title,
+                    contenido = note.description,
+                    idCarpeta = null,
+                    idMateria = null,
+                    tipoVisibilidad = tipoVisibilidad,
+                    archivos = emptyList()
+                )
                 showNoteDialog = false
             }
         )
