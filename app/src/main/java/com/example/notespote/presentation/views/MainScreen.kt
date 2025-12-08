@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -25,6 +26,8 @@ import com.example.notespote.presentation.navigation.BottomNavItem
 import com.example.notespote.presentation.navigation.Routes
 import com.example.notespote.viewModel.ApunteViewModel
 import com.example.notespote.viewModel.HomeViewModel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -33,6 +36,7 @@ fun MainScreen(navController: NavController) {
     val bottomNavController = rememberNavController()
     val navBackStackEntry by bottomNavController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+    val scope = rememberCoroutineScope()
 
     val homeViewModel: HomeViewModel = hiltViewModel()
     val apunteViewModel: ApunteViewModel = hiltViewModel()
@@ -106,6 +110,13 @@ fun MainScreen(navController: NavController) {
                     tipoVisibilidad = tipoVisibilidad,
                     archivos = emptyList()
                 )
+
+                // Esperar un momento y recargar los datos
+                scope.launch {
+                    delay(300)
+                    homeViewModel.refresh()
+                }
+
                 showNoteDialog = false
             }
         )

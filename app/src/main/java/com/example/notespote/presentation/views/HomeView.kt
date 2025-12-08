@@ -294,14 +294,6 @@ fun HomeView(
                     }
                 }
             }
-
-            FloatingActionButtons(
-                onAddNoteClick = onAddNoteClick,
-                onCreateFolderClick = onCreateFolderClick,
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(end = 24.dp, bottom = 100.dp)
-            )
         }
     }
 

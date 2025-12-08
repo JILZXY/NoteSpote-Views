@@ -51,7 +51,7 @@ fun WelcomeCard(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(164.dp)
+            .height(140.dp)
             .border(1.dp, Color.White, RoundedCornerShape(16.dp))
             .background(Color(0x1CFFFFFF), RoundedCornerShape(16.dp))
     ) {
@@ -63,126 +63,58 @@ fun WelcomeCard(
         )
         Column(
             modifier = Modifier.fillMaxSize().padding(20.dp),
-            verticalArrangement = Arrangement.SpaceBetween
+            verticalArrangement = Arrangement.Center
         ) {
-            Column {
-                Text(
-                    text = buildAnnotatedString {
-                        withStyle(style = SpanStyle(color = Color(0xFFFFB347))) {
-                            append("B")
-                        }
-                        withStyle(style = SpanStyle(color = Color(0xFFFF9E9E))) {
-                            append("i")
-                        }
-                        withStyle(style = SpanStyle(color = Color(0xFFFFF599))) {
-                            append("e")
-                        }
-                        withStyle(style = SpanStyle(color = Color(0xFF91F48F))) {
-                            append("n")
-                        }
-                        withStyle(style = SpanStyle(color = Color(0xFF9EFFFF))) {
-                            append("v")
-                        }
-                        withStyle(style = SpanStyle(color = Color(0xFFFD99FF))) {
-                            append("e")
-                        }
-                        withStyle(style = SpanStyle(color = Color(0xFFB69CFF))) {
-                            append("n")
-                        }
-                        withStyle(style = SpanStyle(color = Color(0xFF624AF2))) {
-                            append("i")
-                        }
-                        withStyle(style = SpanStyle(color = Color(0xFFFCDDEC))) {
-                            append("d")
-                        }
-                        withStyle(style = SpanStyle(color = Color.White)) {
-                            append("o")
-                        }
-                        append(" a NoteSpot")
-                    },
-                    fontFamily = UrbanistFamily,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 25.sp,
-                    color = Color.White
-                )
+            Text(
+                text = buildAnnotatedString {
+                    withStyle(style = SpanStyle(color = Color(0xFFFFB347))) {
+                        append("B")
+                    }
+                    withStyle(style = SpanStyle(color = Color(0xFFFF9E9E))) {
+                        append("i")
+                    }
+                    withStyle(style = SpanStyle(color = Color(0xFFFFF599))) {
+                        append("e")
+                    }
+                    withStyle(style = SpanStyle(color = Color(0xFF91F48F))) {
+                        append("n")
+                    }
+                    withStyle(style = SpanStyle(color = Color(0xFF9EFFFF))) {
+                        append("v")
+                    }
+                    withStyle(style = SpanStyle(color = Color(0xFFFD99FF))) {
+                        append("e")
+                    }
+                    withStyle(style = SpanStyle(color = Color(0xFFB69CFF))) {
+                        append("n")
+                    }
+                    withStyle(style = SpanStyle(color = Color(0xFF624AF2))) {
+                        append("i")
+                    }
+                    withStyle(style = SpanStyle(color = Color(0xFFFCDDEC))) {
+                        append("d")
+                    }
+                    withStyle(style = SpanStyle(color = Color.White)) {
+                        append("o")
+                    }
+                    append(" a NoteSpot")
+                },
+                fontFamily = UrbanistFamily,
+                fontWeight = FontWeight.Bold,
+                fontSize = 25.sp,
+                color = Color.White
+            )
 
-                Spacer(modifier = Modifier.height(15.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-                Text(
-                    text = "Crea tu primer apunte o carpeta para iniciar la magia.",
-                    fontFamily = SyneMonoFamily,
-                    fontSize = 14.sp,
-                    color = Color.White,
-                    lineHeight = 14.sp,
-                    modifier = Modifier.fillMaxWidth(0.65f)
-                )
-            }
-
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.Start),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(
-                    modifier = Modifier
-                        .width(110.dp)
-                        .height(33.dp)
-                        .background(
-                            color = Color(0xFFFD99FF),
-                            shape = RoundedCornerShape(20.dp)
-                        )
-                        .clickable { onAddNoteClick() }
-                        .padding(start = 4.dp, top = 4.dp, end = 8.dp, bottom = 4.dp),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.Start),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_add),
-                        contentDescription = "image description",
-                        contentScale = ContentScale.None,
-                        alignment = Alignment.TopStart,
-                        modifier = Modifier
-                            .padding(1.dp)
-                            .size(22.dp)
-                    )
-                    Text(
-                        text = "Añadir Nota",
-                        fontFamily = UrbanistFamily,
-                        fontSize = 12.sp,
-                        color = RichBlack,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-
-                Row(
-                    modifier = Modifier
-                        .width(100.dp)
-                        .height(33.dp)
-                        .background(
-                            color = Color(0xFFFFF599),
-                            shape = RoundedCornerShape(20.dp)
-                        )
-                        .clickable { onCreateFolderClick() }
-                        .padding(start = 4.dp, top = 4.dp, end = 8.dp, bottom = 4.dp),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.Start),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_add),
-                        contentDescription = "image description",
-                        contentScale = ContentScale.None,
-                        modifier = Modifier
-                            .padding(1.dp)
-                            .size(30.dp)
-                    )
-                    Text(
-                        text = "Crear carpeta",
-                        fontFamily = UrbanistFamily,
-                        fontSize = 12.sp,
-                        color = RichBlack,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
+            Text(
+                text = "Usa los botones flotantes para crear tu primer apunte o carpeta.",
+                fontFamily = SyneMonoFamily,
+                fontSize = 13.sp,
+                color = Color.White,
+                lineHeight = 16.sp,
+                modifier = Modifier.fillMaxWidth(0.65f)
+            )
         }
     }
 }

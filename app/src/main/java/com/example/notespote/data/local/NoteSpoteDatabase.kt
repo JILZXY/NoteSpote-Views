@@ -37,7 +37,7 @@ import com.example.notespote.data.local.entities.LikeEntity
         EtiquetaApunteEntity::class,
         SeguimientoEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = true
 )
 @TypeConverters(Converters::class)

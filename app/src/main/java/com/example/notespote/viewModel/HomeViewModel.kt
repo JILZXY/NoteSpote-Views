@@ -21,7 +21,8 @@ class HomeViewModel @Inject constructor(
     private val getCurrentUserUseCase: GetCurrentUserUseCase,
     private val getMyApunteUseCase: GetMyApunteUseCase,
     private val getCarpetasRaizUseCase: GetCarpetasRaizUseCase,
-    private val createCarpetaUseCase: CreateCarpetaUseCase
+    private val createCarpetaUseCase: CreateCarpetaUseCase,
+    private val syncAllUseCase: com.example.notespote.domain.usecases.sync.SyncAllUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
@@ -30,8 +31,24 @@ class HomeViewModel @Inject constructor(
     private var currentUserId: String? = null
 
     init {
+        syncDataFromFirebase()
         loadHomeData()
         observeCarpetas()
+    }
+
+    private fun syncDataFromFirebase() {
+        viewModelScope.launch {
+            try {
+                android.util.Log.d("HomeViewModel", "Iniciando sincronización desde Firebase...")
+                syncAllUseCase().onSuccess {
+                    android.util.Log.d("HomeViewModel", "Sincronización completada exitosamente")
+                }.onFailure { error ->
+                    android.util.Log.e("HomeViewModel", "Error en sincronización: ${error.message}", error)
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("HomeViewModel", "Excepción durante sincronización", e)
+            }
+        }
     }
 
     private fun observeCarpetas() {
