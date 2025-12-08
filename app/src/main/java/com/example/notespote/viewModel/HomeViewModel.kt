@@ -58,6 +58,11 @@ class HomeViewModel @Inject constructor(
                 userResult.onSuccess { usuario ->
                     if (usuario != null && usuario.id != currentUserId) {
                         currentUserId = usuario.id
+                        // Actualizar foto y nombre si cambian
+                        _uiState.value = _uiState.value.copy(
+                            userName = usuario.nombre ?: usuario.nombreUsuario,
+                            userProfilePhoto = usuario.fotoPerfil
+                        )
                         // Ahora observamos las carpetas continuamente
                         getCarpetasRaizUseCase(usuario.id).collect { carpetasResult ->
                             carpetasResult.onSuccess { carpetas ->
@@ -69,6 +74,12 @@ class HomeViewModel @Inject constructor(
                                 updateHasContent()
                             }
                         }
+                    } else if (usuario != null) {
+                        // Actualizar solo foto y nombre si cambian
+                        _uiState.value = _uiState.value.copy(
+                            userName = usuario.nombre ?: usuario.nombreUsuario,
+                            userProfilePhoto = usuario.fotoPerfil
+                        )
                     }
                 }
             }
@@ -89,10 +100,20 @@ class HomeViewModel @Inject constructor(
                 if (usuario != null) {
                     // Tenemos un usuario, cargamos sus datos
                     val userId = usuario.id
-                    val userName = usuario.nombre ?: usuario.nombreUsuario
+                    val userName = if (!usuario.nombre.isNullOrBlank() && !usuario.apellido.isNullOrBlank()) {
+                        "${usuario.nombre} ${usuario.apellido}"
+                    } else if (!usuario.nombre.isNullOrBlank()) {
+                        usuario.nombre
+                    } else {
+                        usuario.nombreUsuario
+                    }
+                    val userPhoto = usuario.fotoPerfil
 
-                    // Actualizar nombre de usuario
-                    _uiState.value = _uiState.value.copy(userName = userName)
+                    // Actualizar nombre de usuario y foto
+                    _uiState.value = _uiState.value.copy(
+                        userName = userName,
+                        userProfilePhoto = userPhoto
+                    )
 
                     // Cargar carpetas
                     android.util.Log.d("HomeViewModel", "Loading carpetas for userId: $userId")

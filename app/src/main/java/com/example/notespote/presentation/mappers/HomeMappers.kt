@@ -18,12 +18,11 @@ fun Apunte.toNoteCardData(): NoteCardData {
     val date = Date(fechaCreacion)
     return NoteCardData(
         title = titulo,
-        description = contenido ?: "",
+        description = "Sin descripción",
         tags = emptyList(), // Tags are loaded in detail view
         subject = idMateria ?: "Sin materia",
         date = sdf.format(date),
-        isPublic = tipoVisibilidad == TipoVisibilidad.PUBLICO,
-        imageResId = if (tieneImagenes) R.drawable.mascot_notespot else R.drawable.mascot_notespot
+        isPublic = tipoVisibilidad == TipoVisibilidad.PUBLICO
     )
 }
 
@@ -32,7 +31,7 @@ fun ApunteDetallado.toNoteCardData(): NoteCardData {
     val date = Date(apunte.fechaCreacion)
     return NoteCardData(
         title = apunte.titulo,
-        description = apunte.contenido ?: "",
+        description = "Sin descripción",
         tags = etiquetas.map { it.nombreEtiqueta to Color(
             Random.nextInt(256),
             Random.nextInt(256),
@@ -40,8 +39,7 @@ fun ApunteDetallado.toNoteCardData(): NoteCardData {
         ) },
         subject = apunte.idMateria ?: "Sin materia",
         date = sdf.format(date),
-        isPublic = apunte.tipoVisibilidad == TipoVisibilidad.PUBLICO,
-        imageResId = if (apunte.tieneImagenes) R.drawable.mascot_notespot else R.drawable.mascot_notespot
+        isPublic = apunte.tipoVisibilidad == TipoVisibilidad.PUBLICO
     )
 }
 

@@ -8,5 +8,6 @@ data class HomeUiState(
     val hasContent: Boolean = false,
     val recentFolders: List<Carpeta> = emptyList(),
     val recentNotes: List<Apunte> = emptyList(),
-    val userName: String = ""
+    val userName: String = "",
+    val userProfilePhoto: String? = null
 )

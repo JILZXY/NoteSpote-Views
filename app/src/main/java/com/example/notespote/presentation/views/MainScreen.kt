@@ -67,7 +67,7 @@ fun MainScreen(navController: NavController) {
             NavHost(navController = bottomNavController, startDestination = BottomNavItem.Home.route) {
                 composable(BottomNavItem.Home.route) {
                     com.example.notespot.presentation.views.HomeView(
-                        onProfileClick = { navController.navigate(Routes.Profile.route) },
+                        onProfileClick = { navController.navigate(Routes.MyProfile.route) },
                         onNotificationsClick = { navController.navigate(Routes.Notifications.route) },
                         onAddNoteClick = { showNoteDialog = true },
                         onCreateFolderClick = { showFolderDialog = true },

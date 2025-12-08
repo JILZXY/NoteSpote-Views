@@ -60,9 +60,9 @@ fun HomeViewFilled(
     )
 
     val recentNotes = listOf(
-        NoteCardData("My Homework", "this is the text this is the ...", listOf("Ejercicios" to Color(0xFFB39DDB), "Cálculo integral" to Color(0xFFB39DDB)), "Matemáticas", "Ayer", true, R.drawable.mascot_notespot),
-        NoteCardData("My Homework", "this is the text this is the ...", listOf("Apunte" to Color(0xFF81D4FA)), "Notas", "Ayer", false, R.drawable.mascot_notespot),
-        NoteCardData("My Homework", "this is the text this is the ...", listOf("Ejercicios" to Color(0xFFB39DDB)), "Biología", "Ayer", false, R.drawable.mascot_notespot)
+        NoteCardData("My Homework", "this is the text this is the ...", listOf("Ejercicios" to Color(0xFFB39DDB), "Cálculo integral" to Color(0xFFB39DDB)), "Matemáticas", "Ayer", true),
+        NoteCardData("My Homework", "this is the text this is the ...", listOf("Apunte" to Color(0xFF81D4FA)), "Notas", "Ayer", false),
+        NoteCardData("My Homework", "this is the text this is the ...", listOf("Ejercicios" to Color(0xFFB39DDB)), "Biología", "Ayer", false)
     )
 
     Column(

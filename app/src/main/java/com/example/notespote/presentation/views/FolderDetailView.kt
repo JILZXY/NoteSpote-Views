@@ -33,8 +33,8 @@ import com.example.notespote.presentation.theme.RichBlack
 fun FolderDetailView(folderName: String = "Apuntes de Física", onBackClick: () -> Unit) {
 
     val notesInFolder = listOf(
-        NoteCardData("My Homework", "this is the text this is the ...", listOf("Ejercicios" to Color(0xFFB39DDB), "Cálculo integral" to Color(0xFFB39DDB)), "Matemáticas", "Ayer", true, R.drawable.mascot_notespot),
-        NoteCardData("My Homework", "this is the text this is the ...", listOf("Apunte" to Color(0xFF81D4FA)), "Notas", "Ayer", false, R.drawable.mascot_notespot)
+        NoteCardData("My Homework", "this is the text this is the ...", listOf("Ejercicios" to Color(0xFFB39DDB), "Cálculo integral" to Color(0xFFB39DDB)), "Matemáticas", "Ayer", true),
+        NoteCardData("My Homework", "this is the text this is the ...", listOf("Apunte" to Color(0xFF81D4FA)), "Notas", "Ayer", false)
     )
 
     Column(

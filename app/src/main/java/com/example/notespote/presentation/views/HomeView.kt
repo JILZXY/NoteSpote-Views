@@ -20,6 +20,9 @@ import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -43,6 +46,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.notespot.presentation.components.buttons.FloatingActionButtons
 import com.example.notespote.R
 import com.example.notespote.data.local.entities.TipoVisibilidad
+import com.example.notespote.domain.model.Apunte
 import com.example.notespote.domain.model.Carpeta
 import com.example.notespote.presentation.components.cards.FolderCard
 import com.example.notespote.presentation.components.cards.FolderCardData
@@ -59,6 +63,7 @@ import com.example.notespote.presentation.theme.RichBlack
 import com.example.notespote.presentation.theme.SyneMonoFamily
 import com.example.notespote.presentation.theme.UrbanistFamily
 import com.example.notespote.presentation.views.UpdateFolderView
+import com.example.notespote.viewModel.ApunteViewModel
 import com.example.notespote.viewModel.CarpetaViewModel
 import com.example.notespote.viewModel.HomeViewModel
 
@@ -71,12 +76,14 @@ fun HomeView(
     onSeeAllFoldersClick: () -> Unit,
     onNoteClick: (String) -> Unit,
     viewModel: HomeViewModel,
-    carpetaViewModel: CarpetaViewModel = hiltViewModel()
+    carpetaViewModel: CarpetaViewModel = hiltViewModel(),
+    apunteViewModel: ApunteViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
     var folderToDelete by remember { mutableStateOf<Carpeta?>(null) }
     var folderToUpdate by remember { mutableStateOf<Carpeta?>(null) }
+    var apunteToDelete by remember { mutableStateOf<Apunte?>(null) }
 
     // Carpetas predeterminadas
     val defaultFolders = listOf(
@@ -118,7 +125,7 @@ fun HomeView(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(horizontal = 24.dp)
-                    .padding(top = 60.dp, bottom = 80.dp)
+                    .padding(top = 100.dp, bottom = 80.dp)
             ) {
                 // Header
                 Row(
@@ -130,20 +137,31 @@ fun HomeView(
                         modifier = Modifier.clickable { onProfileClick() },
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .size(50.dp)
-                                .clip(CircleShape)
-                                .background(Celeste),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = uiState.userName.firstOrNull()?.toString() ?: "U",
-                                fontFamily = UrbanistFamily,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 24.sp,
-                                color = RichBlack
+                        if (uiState.userProfilePhoto != null) {
+                            coil.compose.AsyncImage(
+                                model = uiState.userProfilePhoto,
+                                contentDescription = "Foto de perfil",
+                                modifier = Modifier
+                                    .size(50.dp)
+                                    .clip(CircleShape),
+                                contentScale = androidx.compose.ui.layout.ContentScale.Crop
                             )
+                        } else {
+                            Box(
+                                modifier = Modifier
+                                    .size(50.dp)
+                                    .clip(CircleShape)
+                                    .background(Celeste),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = uiState.userName.firstOrNull()?.toString() ?: "U",
+                                    fontFamily = UrbanistFamily,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 24.sp,
+                                    color = RichBlack
+                                )
+                            }
                         }
 
                         Column(
@@ -280,14 +298,14 @@ fun HomeView(
                                 NoteCard(
                                     note = NoteCardData(
                                         title = apunte.titulo,
-                                        description = apunte.contenido ?: "Sin descripción",
+                                        description = "Sin descripción",
                                         tags = emptyList(), // Las etiquetas se pueden agregar después
-                                        subject = "General", // Se puede obtener de idMateria después
+                                        subject = apunte.idMateria ?: "Sin materia",
                                         date = formattedDate,
-                                        isPublic = apunte.tipoVisibilidad == TipoVisibilidad.PUBLICO,
-                                        imageResId = R.drawable.mascot_notespot
+                                        isPublic = apunte.tipoVisibilidad == TipoVisibilidad.PUBLICO
                                     ),
-                                    onClick = { onNoteClick(apunte.id) }
+                                    onClick = { onNoteClick(apunte.id) },
+                                    onLongClick = { apunteToDelete = apunte }
                                 )
                             }
                         }
@@ -297,7 +315,7 @@ fun HomeView(
         }
     }
 
-    // Diálogo de eliminar
+    // Diálogo de eliminar carpeta
     folderToDelete?.let { carpeta ->
         DeleteFolderDialog(
             folderName = carpeta.nombreCarpeta,
@@ -320,4 +338,56 @@ fun HomeView(
             onDismiss = { folderToUpdate = null }
         )
     }
+
+    // Diálogo de eliminar apunte
+    apunteToDelete?.let { apunte ->
+        DeleteNoteDialog(
+            noteTitle = apunte.titulo,
+            onConfirm = {
+                apunteViewModel.deleteApunte(apunte.id)
+                apunteToDelete = null
+            },
+            onDismiss = { apunteToDelete = null }
+        )
+    }
+}
+
+@Composable
+private fun DeleteNoteDialog(
+    noteTitle: String,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                "Eliminar apunte",
+                fontFamily = OutfitFamily,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
+        },
+        text = {
+            Text(
+                "¿Estás seguro de que deseas eliminar \"$noteTitle\"? Esta acción no se puede deshacer.",
+                fontFamily = OutfitFamily,
+                color = Color.White
+            )
+        },
+        confirmButton = {
+            Button(
+                onClick = onConfirm,
+                colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+            ) {
+                Text("Eliminar", fontFamily = OutfitFamily, color = Color.White)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancelar", fontFamily = OutfitFamily, color = Color.White)
+            }
+        },
+        containerColor = Color(0xFF1E1E1E)
+    )
 }

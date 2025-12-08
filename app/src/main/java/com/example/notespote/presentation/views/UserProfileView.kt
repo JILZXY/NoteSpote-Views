@@ -38,7 +38,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -55,7 +54,7 @@ fun UserProfileView(onBackClick: () -> Unit) {
     val tabs = listOf("Todo", "Notas", "Carpetas")
 
     val publicNotes = listOf(
-        NoteCardData("My Homework", "this is the text this is the ...", listOf("Ejercicios" to Color(0xFFB39DDB), "Cálculo integral" to Color(0xFFB39DDB)), "Matemáticas", "Ayer", true, R.drawable.mascot_notespot)
+        NoteCardData("My Homework", "this is the text this is the ...", listOf("Ejercicios" to Color(0xFFB39DDB), "Cálculo integral" to Color(0xFFB39DDB)), "Matemáticas", "Ayer", true)
     )
     val publicFolders = listOf(
         FolderItemData("Apuntes de Física", Color(0xFF81D4FA)),
@@ -175,6 +174,8 @@ fun UserProfileView(onBackClick: () -> Unit) {
         }
     }
 }
+
+data class FolderItemData(val name: String, val color: Color)
 
 @Composable
 private fun ProfileStat(value: String, label: String) {
