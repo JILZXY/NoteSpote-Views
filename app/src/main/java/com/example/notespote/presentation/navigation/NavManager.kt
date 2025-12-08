@@ -142,9 +142,37 @@ fun NavManager() {
             FolderDetailView(onBackClick = { navController.popBackStack() })
         }
 
-        composable(Routes.NoteContent.route) { backStackEntry ->
-            val apunteId = backStackEntry.arguments?.getString("apunteId") ?: return@composable
+        composable(
+            route = Routes.NoteContent.route,
+            arguments = listOf(androidx.navigation.navArgument("apunteId") {
+                type = androidx.navigation.NavType.StringType
+            })
+        ) { backStackEntry ->
+            val apunteId = backStackEntry.arguments?.getString("apunteId") ?: run {
+                android.util.Log.e("NavManager", "apunteId is null in NoteContent route")
+                return@composable
+            }
+            android.util.Log.d("NavManager", "Opening note with apunteId: $apunteId")
             val apunteViewModel: ApunteViewModel = hiltViewModel()
+
+            // File pickers
+            val imagePickerLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
+                contract = androidx.activity.result.contract.ActivityResultContracts.GetMultipleContents()
+            ) { uris ->
+                if (uris.isNotEmpty()) {
+                    android.util.Log.d("NavManager", "Selected ${uris.size} images")
+                    apunteViewModel.addArchivos(apunteId, uris)
+                }
+            }
+
+            val filePickerLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
+                contract = androidx.activity.result.contract.ActivityResultContracts.GetMultipleContents()
+            ) { uris ->
+                if (uris.isNotEmpty()) {
+                    android.util.Log.d("NavManager", "Selected ${uris.size} files")
+                    apunteViewModel.addArchivos(apunteId, uris)
+                }
+            }
 
             // Set the apunteId to trigger the flow
             LaunchedEffect(apunteId) {
@@ -152,18 +180,18 @@ fun NavManager() {
             }
 
             val apunteDetallado by apunteViewModel.apunteDetallado.collectAsState()
+            val noteBlocks by apunteViewModel.noteBlocks.collectAsState()
 
             apunteDetallado?.let { detalle: com.example.notespote.domain.model.ApunteDetallado ->
-                NoteContentView(
+                val context = androidx.compose.ui.platform.LocalContext.current
+
+                com.example.notespote.presentation.views.BlockBasedNoteContentView(
                     apunteDetallado = detalle,
+                    noteBlocks = noteBlocks,
                     onBackClick = { navController.popBackStack() },
-                    onEditClick = { /* User clicked edit button */ },
-                    onSaveClick = { titulo, contenido, tags ->
-                        // Update apunte with new title and content
-                        val updatedApunte = detalle.apunte.copy(
-                            titulo = titulo,
-                            contenido = contenido
-                        )
+                    onSaveClick = { titulo ->
+                        // Update apunte with new title
+                        val updatedApunte = detalle.apunte.copy(titulo = titulo)
                         apunteViewModel.updateApunte(updatedApunte)
                     },
                     onAddTag = { tagParam ->
@@ -176,10 +204,74 @@ fun NavManager() {
                             apunteViewModel.agregarEtiqueta(apunteId, tagParam)
                         }
                     },
-                    onAddText = { /* TODO: Implementar agregar texto */ },
-                    onUploadFile = { /* TODO: Implementar subir archivo */ },
-                    onAddImage = { /* TODO: Implementar agregar imagen */ },
-                    onDrawClick = { /* TODO: Implementar modo dibujo */ }
+                    onAddTextBlock = {
+                        apunteViewModel.addTextBlock()
+                    },
+                    onAddPostipBlock = {
+                        apunteViewModel.addPostipBlock()
+                    },
+                    onUploadFile = {
+                        // Lanzar selector de archivos (PDF, DOCX, TXT, etc.)
+                        filePickerLauncher.launch("*/*")
+                    },
+                    onAddImage = {
+                        // Lanzar selector de imágenes
+                        imagePickerLauncher.launch("image/*")
+                    },
+                    onDrawClick = { /* TODO: Implementar modo dibujo */ },
+                    onBlockContentChange = { blockId, newContent ->
+                        apunteViewModel.updateBlock(blockId, newContent)
+                    },
+                    onBlockDelete = { blockId ->
+                        apunteViewModel.deleteBlock(blockId)
+                    },
+                    onOpenFile = { rutaLocal ->
+                        try {
+                            val file = java.io.File(rutaLocal)
+                            val uri = androidx.core.content.FileProvider.getUriForFile(
+                                context,
+                                "${context.packageName}.fileprovider",
+                                file
+                            )
+
+                            val mimeType = context.contentResolver.getType(uri)
+                                ?: when (file.extension.lowercase()) {
+                                    "pdf" -> "application/pdf"
+                                    "jpg", "jpeg" -> "image/jpeg"
+                                    "png" -> "image/png"
+                                    "gif" -> "image/gif"
+                                    "doc" -> "application/msword"
+                                    "docx" -> "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                                    "txt" -> "text/plain"
+                                    else -> "application/octet-stream"
+                                }
+
+                            val intent = android.content.Intent(android.content.Intent.ACTION_VIEW).apply {
+                                setDataAndType(uri, mimeType)
+                                addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                            }
+
+                            try {
+                                context.startActivity(intent)
+                                android.util.Log.d("NavManager", "Opened file: $rutaLocal with type: $mimeType")
+                            } catch (e: android.content.ActivityNotFoundException) {
+                                android.util.Log.e("NavManager", "No app found to open file type: $mimeType")
+                                android.widget.Toast.makeText(
+                                    context,
+                                    "No hay aplicación para abrir este tipo de archivo",
+                                    android.widget.Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        } catch (e: Exception) {
+                            android.util.Log.e("NavManager", "Error opening file: $rutaLocal", e)
+                            android.widget.Toast.makeText(
+                                context,
+                                "Error al abrir el archivo",
+                                android.widget.Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
                 )
             }
         }

@@ -251,7 +251,7 @@ class CarpetaRepositoryImpl @Inject constructor(
                         .document(carpetaId)
                         .set(dto)
                         .await()
-
+                    Log.d("CarpetaRepository", "Carpeta $carpetaId synced to Firestore successfully.")
                     carpetaDao.updateSyncStatus(carpetaId, SyncStatus.SYNCED)
                 }
                 SyncStatus.PENDING_DELETE -> {

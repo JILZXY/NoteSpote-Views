@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -61,6 +62,9 @@ import com.example.notespote.presentation.components.dialogs.AddTagDialog
 import com.example.notespote.presentation.theme.OutfitFamily
 import com.example.notespote.presentation.theme.RichBlack
 import kotlin.math.absoluteValue
+import coil.compose.AsyncImage
+import androidx.compose.ui.layout.ContentScale
+import java.io.File
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -73,28 +77,20 @@ fun NoteContentView(
     onAddText: () -> Unit,
     onUploadFile: () -> Unit,
     onAddImage: () -> Unit,
-    onDrawClick: () -> Unit
+    onDrawClick: () -> Unit,
+    onOpenFile: ((String) -> Unit)? = null
 ) {
     Log.d("NoteContentView", "Recomposing with tags: ${apunteDetallado.etiquetas.map { it.nombreEtiqueta }}")
 
-    var isDarkMode by remember { mutableStateOf(true) } // Default to dark mode
+    var isDarkMode by remember { mutableStateOf(true) }
     var isEditing by remember { mutableStateOf(false) }
     var showAddTagDialog by remember { mutableStateOf(false) }
 
     var editableTitle by remember { mutableStateOf(apunteDetallado.apunte.titulo) }
     var editableContent by remember { mutableStateOf(apunteDetallado.apunte.contenido ?: "") }
 
-    val backgroundColor = if (isDarkMode) RichBlack else Color.White
-    val textColor = if (isDarkMode) Color.White else Color.Black
-    val secondaryTextColor = if (isDarkMode) Color.White.copy(alpha = 0.7f) else Color.Gray
-
-    val tagColors = remember {
-        listOf(
-            Color(0xFFE91E63), Color(0xFF9C27B0), Color(0xFF673AB7), Color(0xFF3F51B5),
-            Color(0xFF2196F3), Color(0xFF00BCD4), Color(0xFF009688), Color(0xFF4CAF50),
-            Color(0xFFFF9800), Color(0xFF795548)
-        )
-    }
+    val backgroundColor = Color(0xFF0A0A0A)
+    val textColor = Color.White
 
     Box(
         modifier = Modifier
@@ -104,7 +100,7 @@ fun NoteContentView(
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
-            // Header
+            // Header con botones
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -112,7 +108,11 @@ fun NoteContentView(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = onBackClick) {
+                // Botón atrás
+                IconButton(
+                    onClick = onBackClick,
+                    modifier = Modifier.size(40.dp)
+                ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Atrás",
@@ -120,56 +120,81 @@ fun NoteContentView(
                     )
                 }
 
+                // Botones de la derecha
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Switch(
-                        checked = isDarkMode,
-                        onCheckedChange = { isDarkMode = it },
-                        colors = SwitchDefaults.colors(
-                            checkedThumbColor = Color.White,
-                            checkedTrackColor = Color.Gray,
-                            uncheckedThumbColor = Color.Gray,
-                            uncheckedTrackColor = Color.LightGray
-                        )
-                    )
-
-                    IconButton(onClick = {
-                        isEditing = !isEditing
-                        if (!isEditing) onEditClick()
-                    }) {
-                        Icon(
-                            imageVector = Icons.Outlined.Edit,
-                            contentDescription = "Editar",
-                            tint = textColor
+                    // Switch modo oscuro
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .background(Color(0xFF1E1E1E), CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Switch(
+                            checked = isDarkMode,
+                            onCheckedChange = { isDarkMode = it },
+                            modifier = Modifier.size(32.dp),
+                            colors = SwitchDefaults.colors(
+                                checkedThumbColor = Color.White,
+                                checkedTrackColor = Color(0xFF4A4A4A),
+                                uncheckedThumbColor = Color.Gray,
+                                uncheckedTrackColor = Color(0xFF2A2A2A)
+                            )
                         )
                     }
 
-                    IconButton(onClick = {
-                        onSaveClick(editableTitle, editableContent, apunteDetallado.etiquetas.map { it.nombreEtiqueta })
-                    }) {
+                    // Botón editar
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .background(Color(0xFF1E1E1E), CircleShape)
+                            .clickable {
+                                isEditing = !isEditing
+                                if (!isEditing) onEditClick()
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Edit,
+                            contentDescription = "Editar",
+                            tint = textColor,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+
+                    // Botón guardar
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .background(Color(0xFF1E1E1E), CircleShape)
+                            .clickable {
+                                onSaveClick(editableTitle, editableContent, apunteDetallado.etiquetas.map { it.nombreEtiqueta })
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
                         Icon(
                             imageVector = Icons.Default.Check,
                             contentDescription = "Guardar",
-                            tint = textColor
+                            tint = textColor,
+                            modifier = Modifier.size(20.dp)
                         )
                     }
                 }
             }
 
-            // Content Section
+            // Contenido scrolleable
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
-                    .background(
-                        color = Color(0xFF000000),
-                        shape = RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp)
-                    )
-                    .padding(24.dp)
+                    .padding(horizontal = 20.dp)
                     .verticalScroll(rememberScrollState())
             ) {
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Título
                 if (isEditing) {
                     TextField(
                         value = editableTitle,
@@ -178,7 +203,7 @@ fun NoteContentView(
                             .fillMaxWidth()
                             .padding(bottom = 16.dp),
                         textStyle = TextStyle(
-                            fontSize = 32.sp,
+                            fontSize = 28.sp,
                             fontWeight = FontWeight.Bold,
                             fontFamily = OutfitFamily,
                             color = textColor
@@ -186,17 +211,24 @@ fun NoteContentView(
                         colors = TextFieldDefaults.colors(
                             focusedContainerColor = Color.Transparent,
                             unfocusedContainerColor = Color.Transparent,
-                            focusedIndicatorColor = textColor,
-                            unfocusedIndicatorColor = textColor.copy(alpha = 0.5f),
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
                             focusedTextColor = textColor,
                             unfocusedTextColor = textColor
                         ),
-                        placeholder = { Text("Título del apunte", fontSize = 32.sp, fontWeight = FontWeight.Bold, color = secondaryTextColor) }
+                        placeholder = {
+                            Text(
+                                "Título del apunte",
+                                fontSize = 28.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.Gray
+                            )
+                        }
                     )
                 } else {
                     Text(
                         text = editableTitle,
-                        fontSize = 32.sp,
+                        fontSize = 28.sp,
                         fontWeight = FontWeight.Bold,
                         fontFamily = OutfitFamily,
                         color = textColor,
@@ -204,44 +236,59 @@ fun NoteContentView(
                     )
                 }
 
+                // Tags
                 FlowRow(
-                    modifier = Modifier.padding(bottom = 16.dp),
+                    modifier = Modifier.padding(bottom = 20.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
+                    // Botón Add Tag
                     Button(
                         onClick = { showAddTagDialog = true },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent, contentColor = textColor),
-                        border = BorderStroke(1.dp, secondaryTextColor),
-                        shape = RoundedCornerShape(16.dp),
-                        modifier = Modifier.height(32.dp),
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.Transparent,
+                            contentColor = textColor
+                        ),
+                        border = BorderStroke(1.dp, Color(0xFF3A3A3A)),
+                        shape = RoundedCornerShape(20.dp),
+                        modifier = Modifier.height(36.dp),
+                        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp)
                     ) {
-                        Icon(imageVector = Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Add Tag", fontSize = 12.sp, fontFamily = OutfitFamily)
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp),
+                            tint = textColor
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            "Add Tag",
+                            fontSize = 13.sp,
+                            fontFamily = OutfitFamily,
+                            fontWeight = FontWeight.Medium
+                        )
                     }
 
+                    // Tags existentes
                     apunteDetallado.etiquetas.forEach { etiqueta ->
-                        val color = remember(etiqueta.nombreEtiqueta) {
-                            tagColors[etiqueta.nombreEtiqueta.hashCode().absoluteValue % tagColors.size]
+                        val tagColor = when (etiqueta.nombreEtiqueta.lowercase()) {
+                            "exercises" -> Color(0xFFB794F6)
+                            "calcular" -> Color(0xFF81E6A1)
+                            else -> Color(0xFF64B5F6)
                         }
+
                         Row(
                             modifier = Modifier
-                                .height(32.dp)
-                                .border(width = 1.dp, color = color, shape = RoundedCornerShape(16.dp))
-                                .background(
-                                    color = color.copy(alpha = 0.1f),
-                                    shape = RoundedCornerShape(16.dp)
-                                )
-                                .padding(horizontal = 12.dp, vertical = 6.dp),
+                                .height(36.dp)
+                                .background(tagColor, RoundedCornerShape(20.dp))
+                                .padding(horizontal = 14.dp, vertical = 6.dp),
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
                             Text(
-                                "#${etiqueta.nombreEtiqueta}",
-                                fontSize = 12.sp,
-                                color = color,
+                                "# ${etiqueta.nombreEtiqueta}",
+                                fontSize = 13.sp,
+                                color = Color.White,
                                 fontFamily = OutfitFamily,
                                 fontWeight = FontWeight.Medium
                             )
@@ -249,55 +296,227 @@ fun NoteContentView(
                                 Icon(
                                     imageVector = Icons.Default.Close,
                                     contentDescription = "Eliminar etiqueta",
-                                    modifier = Modifier.size(16.dp).clickable { onAddTag("REMOVE:${etiqueta.id}") },
-                                    tint = color
+                                    modifier = Modifier
+                                        .size(16.dp)
+                                        .clickable { onAddTag("REMOVE:${etiqueta.id}") },
+                                    tint = Color.White
                                 )
                             }
                         }
                     }
                 }
 
-                if (apunteDetallado.apunte.tieneImagenes || apunteDetallado.archivos.isNotEmpty()) {
+                // Imágenes y archivos adjuntos
+                if (apunteDetallado.archivos.isNotEmpty()) {
+                    val imagenes = apunteDetallado.archivos.filter { it.esImagen }
+                    val otrosArchivos = apunteDetallado.archivos.filter { !it.esImagen }
+
+                    // Mostrar imágenes
+                    if (imagenes.isNotEmpty()) {
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            imagenes.forEach { imagen ->
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clip(RoundedCornerShape(16.dp))
+                                        .background(Color(0xFF1A1A1A))
+                                        .clickable {
+                                            imagen.rutaLocal?.let { onOpenFile?.invoke(it) }
+                                        }
+                                ) {
+                                    // Mostrar imagen real usando Coil
+                                    if (imagen.rutaLocal != null) {
+                                        val imageFile = File(imagen.rutaLocal)
+                                        android.util.Log.d("NoteContentView", "Loading image: ${imageFile.absolutePath}, exists: ${imageFile.exists()}")
+
+                                        AsyncImage(
+                                            model = imageFile,
+                                            contentDescription = imagen.nombreArchivo,
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .height(280.dp)
+                                                .clip(RoundedCornerShape(16.dp)),
+                                            contentScale = ContentScale.Crop,
+                                            placeholder = androidx.compose.ui.graphics.painter.ColorPainter(Color(0xFF2A2A2A)),
+                                            error = androidx.compose.ui.graphics.painter.ColorPainter(Color(0xFF3A3A3A))
+                                        )
+                                    } else {
+                                        // Placeholder si no hay ruta local
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .height(280.dp)
+                                                .background(Color(0xFF2A2A2A)),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Column(
+                                                horizontalAlignment = Alignment.CenterHorizontally,
+                                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Image,
+                                                    contentDescription = null,
+                                                    modifier = Modifier.size(48.dp),
+                                                    tint = Color.Gray
+                                                )
+                                                Text(
+                                                    text = "Cargando imagen...",
+                                                    fontSize = 14.sp,
+                                                    color = Color.Gray,
+                                                    fontFamily = OutfitFamily
+                                                )
+                                            }
+                                        }
+                                    }
+
+                                    // Nombre del archivo en la parte inferior
+                                    if (isEditing) {
+                                        Text(
+                                            text = imagen.nombreArchivo,
+                                            modifier = Modifier
+                                                .align(Alignment.BottomStart)
+                                                .background(Color.Black.copy(alpha = 0.7f))
+                                                .padding(horizontal = 12.dp, vertical = 8.dp),
+                                            fontSize = 12.sp,
+                                            color = Color.White,
+                                            fontFamily = OutfitFamily
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(12.dp))
+                    }
+
+                    // Mostrar otros archivos (PDF, DOCX, etc.)
+                    if (otrosArchivos.isNotEmpty()) {
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            otrosArchivos.forEach { archivo ->
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .background(Color(0xFF1E1E1E))
+                                        .clickable {
+                                            archivo.rutaLocal?.let { onOpenFile?.invoke(it) }
+                                        }
+                                        .padding(12.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Row(
+                                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Outlined.CloudUpload,
+                                            contentDescription = null,
+                                            tint = Color(0xFF81E6A1),
+                                            modifier = Modifier.size(32.dp)
+                                        )
+                                        Column {
+                                            Text(
+                                                text = archivo.nombreArchivo,
+                                                fontSize = 14.sp,
+                                                color = textColor,
+                                                fontFamily = OutfitFamily,
+                                                fontWeight = FontWeight.Medium
+                                            )
+                                            Text(
+                                                text = "${archivo.extension.uppercase()} • ${String.format("%.2f", archivo.tamanoMB)} MB",
+                                                fontSize = 12.sp,
+                                                color = Color.Gray,
+                                                fontFamily = OutfitFamily
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(12.dp))
+                    }
+                } else {
+                    // Placeholder cuando no hay archivos
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(200.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(Color.LightGray)
+                            .height(280.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(Color.White)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Image,
                             contentDescription = null,
-                            modifier = Modifier.align(Alignment.Center).size(64.dp),
-                            tint = Color.Gray
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .size(80.dp),
+                            tint = Color(0xFFE0E0E0)
+                        )
+                        Text(
+                            text = "Sin archivos adjuntos",
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .padding(top = 100.dp),
+                            fontSize = 14.sp,
+                            color = Color.Gray,
+                            fontFamily = OutfitFamily
                         )
                     }
-                    Spacer(modifier = Modifier.height(16.dp))
                 }
 
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Contenido de texto
                 if (isEditing) {
                     TextField(
                         value = editableContent,
                         onValueChange = { editableContent = it },
-                        modifier = Modifier.fillMaxWidth().height(200.dp),
-                        textStyle = TextStyle(fontSize = 14.sp, fontFamily = OutfitFamily, color = textColor, lineHeight = 20.sp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp),
+                        textStyle = TextStyle(
+                            fontSize = 14.sp,
+                            fontFamily = OutfitFamily,
+                            color = Color(0xFFB0B0B0),
+                            lineHeight = 22.sp
+                        ),
                         colors = TextFieldDefaults.colors(
                             focusedContainerColor = Color.Transparent,
                             unfocusedContainerColor = Color.Transparent,
-                            focusedIndicatorColor = textColor,
-                            unfocusedIndicatorColor = textColor.copy(alpha = 0.5f),
-                            focusedTextColor = textColor,
-                            unfocusedTextColor = textColor
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            focusedTextColor = Color(0xFFB0B0B0),
+                            unfocusedTextColor = Color(0xFFB0B0B0)
                         ),
-                        placeholder = { Text("Escribe el contenido de tu apunte aquí...", fontSize = 14.sp, color = secondaryTextColor) }
+                        placeholder = {
+                            Text(
+                                "Escribe el contenido de tu apunte aquí...",
+                                fontSize = 14.sp,
+                                color = Color(0xFF606060)
+                            )
+                        }
                     )
                 } else {
-                    Text(text = editableContent, fontSize = 14.sp, fontFamily = OutfitFamily, color = secondaryTextColor, lineHeight = 20.sp)
+                    Text(
+                        text = editableContent,
+                        fontSize = 14.sp,
+                        fontFamily = OutfitFamily,
+                        color = Color(0xFFB0B0B0),
+                        lineHeight = 22.sp
+                    )
                 }
-                Spacer(modifier = Modifier.height(24.dp))
+
+                Spacer(modifier = Modifier.height(100.dp))
             }
         }
 
+        // Diálogo de agregar tag
         if (showAddTagDialog) {
             AddTagDialog(
                 onDismiss = { showAddTagDialog = false },
@@ -314,21 +533,70 @@ fun NoteContentView(
             )
         }
 
+        // Barra inferior con iconos
         Surface(
-            modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(16.dp),
-            shape = RoundedCornerShape(24.dp),
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 20.dp),
+            shape = RoundedCornerShape(28.dp),
             color = Color.White,
-            shadowElevation = 8.dp
+            shadowElevation = 12.dp
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 16.dp, horizontal = 20.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = onAddText) { Icon(imageVector = Icons.Outlined.TextFields, contentDescription = "Agregar texto", tint = Color.Black) }
-                IconButton(onClick = onUploadFile) { Icon(imageVector = Icons.Outlined.CloudUpload, contentDescription = "Subir archivo", tint = Color.Black) }
-                IconButton(onClick = onAddImage) { Icon(imageVector = Icons.Outlined.Image, contentDescription = "Agregar imagen", tint = Color.Black) }
-                IconButton(onClick = onDrawClick) { Icon(imageVector = Icons.Outlined.Draw, contentDescription = "Dibujar", tint = Color.Black) }
+                IconButton(
+                    onClick = onAddText,
+                    modifier = Modifier.size(48.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.TextFields,
+                        contentDescription = "Agregar texto",
+                        tint = Color.Black,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+
+                IconButton(
+                    onClick = onUploadFile,
+                    modifier = Modifier.size(48.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.CloudUpload,
+                        contentDescription = "Subir archivo",
+                        tint = Color.Black,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+
+                IconButton(
+                    onClick = onAddImage,
+                    modifier = Modifier.size(48.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Image,
+                        contentDescription = "Agregar imagen",
+                        tint = Color.Black,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+
+                IconButton(
+                    onClick = onDrawClick,
+                    modifier = Modifier.size(48.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Draw,
+                        contentDescription = "Dibujar",
+                        tint = Color.Black,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
             }
         }
     }

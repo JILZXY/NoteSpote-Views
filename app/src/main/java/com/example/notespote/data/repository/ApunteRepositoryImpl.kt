@@ -293,6 +293,7 @@ class ApunteRepositoryImpl @Inject constructor(
                         .document(apunteId)
                         .set(dto)
                         .addOnSuccessListener {
+                            Log.d("ApunteRepository", "Apunte $apunteId synced to Firestore successfully.")
                             // Marcar como sincronizado
                             kotlinx.coroutines.runBlocking {
                                 apunteDao.updateSyncStatus(apunteId, SyncStatus.SYNCED)
@@ -308,6 +309,7 @@ class ApunteRepositoryImpl @Inject constructor(
                         .document(apunteId)
                         .set(dto)
                         .addOnSuccessListener {
+                            Log.d("ApunteRepository", "Apunte $apunteId updated in Firestore successfully.")
                             kotlinx.coroutines.runBlocking {
                                 apunteDao.updateSyncStatus(apunteId, SyncStatus.SYNCED)
                             }

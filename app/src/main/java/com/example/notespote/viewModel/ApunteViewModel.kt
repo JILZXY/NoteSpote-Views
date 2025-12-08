@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.notespote.data.local.entities.TipoVisibilidad
 import com.example.notespote.domain.model.Apunte
 import com.example.notespote.domain.model.ApunteDetallado
+import com.example.notespote.domain.model.NoteBlock
 import com.example.notespote.domain.usecases.etiquetas.AgregarEtiquetaAApunteUseCase
 import com.example.notespote.domain.usecases.etiquetas.RemoverEtiquetaDeApunteUseCase
 import com.example.notespote.domain.usecases.notes.*
@@ -37,6 +38,7 @@ class ApunteViewModel @Inject constructor(
     private val getPublicApuntesUseCase: GetPublicApuntesUseCase,
     private val agregarEtiquetaAApunteUseCase: AgregarEtiquetaAApunteUseCase,
     private val removerEtiquetaDeApunteUseCase: RemoverEtiquetaDeApunteUseCase,
+    private val addArchivosToApunteUseCase: com.example.notespote.domain.usecases.archivos.AddArchivosToApunteUseCase,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -47,6 +49,10 @@ class ApunteViewModel @Inject constructor(
     val apuntes: StateFlow<List<Apunte>> = _apuntes.asStateFlow()
 
     private val apunteId = MutableStateFlow<String?>(null)
+
+    // Gestión de bloques de contenido
+    private val _noteBlocks = MutableStateFlow<List<NoteBlock>>(emptyList())
+    val noteBlocks: StateFlow<List<NoteBlock>> = _noteBlocks.asStateFlow()
 
     val apunteDetallado: StateFlow<ApunteDetallado?> = apunteId.flatMapLatest { id ->
         Log.d("ApunteViewModel", "flatMapLatest triggered for id: $id")
@@ -60,6 +66,133 @@ class ApunteViewModel @Inject constructor(
 
     fun setApunteId(id: String) {
         apunteId.value = id
+        loadNoteBlocks()
+    }
+
+    /**
+     * Convierte el contenido del apunte y archivos en bloques
+     */
+    private fun loadNoteBlocks() {
+        viewModelScope.launch {
+            apunteDetallado.collect { detalle ->
+                if (detalle != null) {
+                    val blocks = mutableListOf<NoteBlock>()
+                    var order = 0
+
+                    // Agregar contenido de texto como primer bloque si existe
+                    if (!detalle.apunte.contenido.isNullOrBlank()) {
+                        blocks.add(NoteBlock.TextBlock(
+                            content = detalle.apunte.contenido,
+                            order = order++
+                        ))
+                    }
+
+                    // Agregar archivos como bloques
+                    detalle.archivos.forEach { archivo ->
+                        when {
+                            archivo.esImagen -> {
+                                blocks.add(NoteBlock.ImageBlock(
+                                    rutaLocal = archivo.rutaLocal ?: "",
+                                    nombreArchivo = archivo.nombreArchivo,
+                                    order = order++
+                                ))
+                            }
+                            archivo.esPDF -> {
+                                blocks.add(NoteBlock.PdfBlock(
+                                    rutaLocal = archivo.rutaLocal ?: "",
+                                    nombreArchivo = archivo.nombreArchivo,
+                                    tamanoKb = archivo.tamanoKb,
+                                    order = order++
+                                ))
+                            }
+                        }
+                    }
+
+                    _noteBlocks.value = blocks.sortedBy { it.order }
+                }
+            }
+        }
+    }
+
+    /**
+     * Agrega un nuevo bloque de texto
+     */
+    fun addTextBlock(content: String = "", position: Int? = null) {
+        val currentBlocks = _noteBlocks.value.toMutableList()
+        val order = position ?: currentBlocks.size
+        val newBlock = NoteBlock.TextBlock(content = content, order = order)
+        currentBlocks.add(newBlock)
+        _noteBlocks.value = reorderBlocks(currentBlocks)
+    }
+
+    /**
+     * Agrega un nuevo Post-it
+     */
+    fun addPostipBlock(content: String = "", colorHex: String = "#FFEB3B", position: Int? = null) {
+        val currentBlocks = _noteBlocks.value.toMutableList()
+        val order = position ?: currentBlocks.size
+        val newBlock = NoteBlock.PostipBlock(content = content, colorHex = colorHex, order = order)
+        currentBlocks.add(newBlock)
+        _noteBlocks.value = reorderBlocks(currentBlocks)
+    }
+
+    /**
+     * Actualiza el contenido de un bloque
+     */
+    fun updateBlock(blockId: String, newContent: String) {
+        val currentBlocks = _noteBlocks.value.toMutableList()
+        val index = currentBlocks.indexOfFirst { it.id == blockId }
+        if (index != -1) {
+            val block = currentBlocks[index]
+            currentBlocks[index] = when (block) {
+                is NoteBlock.TextBlock -> block.copy(content = newContent)
+                is NoteBlock.PostipBlock -> block.copy(content = newContent)
+                else -> block
+            }
+            _noteBlocks.value = currentBlocks
+        }
+    }
+
+    /**
+     * Elimina un bloque
+     */
+    fun deleteBlock(blockId: String) {
+        val currentBlocks = _noteBlocks.value.toMutableList()
+        currentBlocks.removeAll { it.id == blockId }
+        _noteBlocks.value = reorderBlocks(currentBlocks)
+    }
+
+    /**
+     * Mueve un bloque a una nueva posición
+     */
+    fun moveBlock(blockId: String, newPosition: Int) {
+        val currentBlocks = _noteBlocks.value.toMutableList()
+        val block = currentBlocks.find { it.id == blockId } ?: return
+        currentBlocks.remove(block)
+
+        val updatedBlock = when (block) {
+            is NoteBlock.TextBlock -> block.copy(order = newPosition)
+            is NoteBlock.ImageBlock -> block.copy(order = newPosition)
+            is NoteBlock.PdfBlock -> block.copy(order = newPosition)
+            is NoteBlock.PostipBlock -> block.copy(order = newPosition)
+        }
+
+        currentBlocks.add(newPosition.coerceIn(0, currentBlocks.size), updatedBlock)
+        _noteBlocks.value = reorderBlocks(currentBlocks)
+    }
+
+    /**
+     * Reordena los bloques para mantener índices consecutivos
+     */
+    private fun reorderBlocks(blocks: List<NoteBlock>): List<NoteBlock> {
+        return blocks.mapIndexed { index, block ->
+            when (block) {
+                is NoteBlock.TextBlock -> block.copy(order = index)
+                is NoteBlock.ImageBlock -> block.copy(order = index)
+                is NoteBlock.PdfBlock -> block.copy(order = index)
+                is NoteBlock.PostipBlock -> block.copy(order = index)
+            }
+        }.sortedBy { it.order }
     }
 
     fun loadApuntesByUser(userId: String) {
@@ -177,6 +310,18 @@ class ApunteViewModel @Inject constructor(
         viewModelScope.launch {
             // The Flow will update automatically, no need to call loadApunteById
             removerEtiquetaDeApunteUseCase(apunteId, etiquetaId)
+        }
+    }
+
+    fun addArchivos(apunteId: String, archivos: List<Uri>) {
+        viewModelScope.launch {
+            _uiState.value = ApunteUiState.Loading
+            val result = addArchivosToApunteUseCase(apunteId, archivos)
+            _uiState.value = if (result.isSuccess) {
+                ApunteUiState.Success
+            } else {
+                ApunteUiState.Error(result.exceptionOrNull()?.message ?: "Error al agregar archivos")
+            }
         }
     }
 
