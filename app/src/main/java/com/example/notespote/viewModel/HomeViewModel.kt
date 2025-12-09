@@ -1,0 +1,340 @@
+// viewModel/HomeViewModel.kt
+package com.example.notespote.viewModel
+
+import android.util.Log
+import androidx.compose.foundation.layout.add
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import androidx.work.await
+import com.example.notespote.domain.model.Apunte
+import com.example.notespote.domain.model.Carpeta
+import com.example.notespote.domain.repository.ApunteRepository
+import com.example.notespote.domain.repository.AuthRepository
+import com.example.notespote.domain.repository.CarpetaRepository
+import com.example.notespote.domain.repository.MateriaRepository
+import com.example.notespote.domain.usecases.auth.GetCurrentUserUseCase
+import com.example.notespote.domain.usecases.folders.CreateCarpetaUseCase
+import com.example.notespote.domain.usecases.folders.GetCarpetasRaizUseCase
+import com.example.notespote.domain.usecases.notes.GetMyApunteUseCase
+import com.example.notespote.domain.usecases.sync.SyncAllUseCase
+import com.example.notespote.viewModel.states.HomeUiState
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import javax.inject.Inject
+
+@HiltViewModel
+class HomeViewModel @Inject constructor(
+    private val getCurrentUserUseCase: GetCurrentUserUseCase,
+    private val getMyApunteUseCase: GetMyApunteUseCase,
+    private val getCarpetasRaizUseCase: GetCarpetasRaizUseCase,
+    private val createCarpetaUseCase: CreateCarpetaUseCase,
+    private val syncAllUseCase: SyncAllUseCase,
+    private val carpetaRepository: CarpetaRepository,
+    private val apunteRepository: ApunteRepository,
+    private val authRepository: AuthRepository,
+    private val materiaRepository: MateriaRepository
+) : ViewModel() {
+
+    private val _uiState = MutableStateFlow(HomeUiState())
+    val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
+
+    private var currentUserId: String? = null
+
+    init {
+        syncDataFromFirebase()
+        loadHomeData()
+        observeCarpetas()
+        loadUserData()
+        loadMaterias()
+    }
+
+    private fun syncDataFromFirebase() {
+        viewModelScope.launch {
+            try {
+                android.util.Log.d("HomeViewModel", "Iniciando sincronización desde Firebase...")
+                syncAllUseCase().onSuccess {
+                    android.util.Log.d("HomeViewModel", "Sincronización completada exitosamente")
+                }.onFailure { error ->
+                    android.util.Log.e("HomeViewModel", "Error en sincronización: ${'$'}{error.message}", error)
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("HomeViewModel", "Excepción durante sincronización", e)
+            }
+        }
+    }
+
+    private fun observeCarpetas() {
+        viewModelScope.launch {
+            // Primero obtenemos el usuario
+            getCurrentUserUseCase().collect { userResult ->
+                userResult.onSuccess { usuario ->
+                    if (usuario != null && usuario.id != currentUserId) {
+                        currentUserId = usuario.id
+                        // Actualizar foto y nombre si cambian
+                        _uiState.value = _uiState.value.copy(
+                            userName = usuario.nombre ?: usuario.nombreUsuario,
+                            userProfilePhoto = usuario.fotoPerfil
+                        )
+                        // Ahora observamos las carpetas continuamente
+                        getCarpetasRaizUseCase(usuario.id).collect { carpetasResult ->
+                            carpetasResult.onSuccess { carpetas ->
+                                android.util.Log.d("HomeViewModel", "Carpetas actualizadas: ${'$'}{carpetas.size} items")
+                                _uiState.value = _uiState.value.copy(
+                                    recentFolders = carpetas,
+                                    isLoading = false
+                                )
+                                updateHasContent()
+                            }
+                        }
+                    } else if (usuario != null) {
+                        // Actualizar solo foto y nombre si cambian
+                        _uiState.value = _uiState.value.copy(
+                            userName = usuario.nombre ?: usuario.nombreUsuario,
+                            userProfilePhoto = usuario.fotoPerfil
+                        )
+                    }
+                }
+            }
+        }
+    }
+    fun loadUserData() {
+        viewModelScope.launch {
+            try {
+                val userId = authRepository.getCurrentUserId()
+                if (userId != null) {
+                    // ✅ Cargar carpetas
+                    carpetaRepository.getCarpetasRaiz(userId)
+                        .catch { e ->
+                            Log.e("HomeVM", "Error carpetas: ${'$'}{e.message}", e)
+                        }
+                        .collect { result ->
+                            result.onSuccess { carpetas ->
+                                _uiState.value = _uiState.value.copy(
+                                    recentFolders = carpetas.take(5)
+                                )
+                            }
+                        }
+
+                    // ✅ Cargar apuntes
+                    apunteRepository.getApuntesByUser(userId)
+                        .catch { e ->
+                            Log.e("HomeVM", "Error apuntes: ${'$'}{e.message}", e)
+                        }
+                        .collect { result ->
+                            result.onSuccess { apuntes ->
+                                // Ordenar por más reciente (fechaActualizacion o fechaCreacion)
+                                val sortedApuntes = apuntes.sortedByDescending {
+                                    it.fechaActualizacion ?: it.fechaCreacion
+                                }
+
+                                // Filtrar favoritos
+                                val favoritos = sortedApuntes.filter { it.isFavorito }
+
+                                _uiState.value = _uiState.value.copy(
+                                    recentNotes = sortedApuntes.take(5),
+                                    allNotes = sortedApuntes,
+                                    favoriteNotes = favoritos,
+                                    deletedNotes = emptyList(),
+                                    hasContent = sortedApuntes.isNotEmpty()
+                                )
+                            }
+                        }
+                }
+            } catch (e: Exception) {
+                Log.e("HomeVM", "Error general: ${'$'}{e.message}", e)
+            }
+        }
+    }
+    fun loadHomeData() {
+        viewModelScope.launch {
+            android.util.Log.d("HomeViewModel", "loadHomeData started")
+            _uiState.value = _uiState.value.copy(isLoading = true)
+
+            // Primero obtenemos el usuario actual
+            val userResult = getCurrentUserUseCase().firstOrNull()
+            android.util.Log.d("HomeViewModel", "userResult: $userResult")
+
+            userResult?.onSuccess { usuario ->
+                android.util.Log.d("HomeViewModel", "Usuario obtenido: ${'$'}{usuario?.id}")
+                if (usuario != null) {
+                    // Tenemos un usuario, cargamos sus datos
+                    val userId = usuario.id
+                    val userName = if (!usuario.nombre.isNullOrBlank() && !usuario.apellido.isNullOrBlank()) {
+                        "${'$'}{usuario.nombre} ${'$'}{usuario.apellido}"
+                    } else if (!usuario.nombre.isNullOrBlank()) {
+                        usuario.nombre
+                    } else {
+                        usuario.nombreUsuario
+                    }
+                    val userPhoto = usuario.fotoPerfil
+
+                    // Actualizar nombre de usuario y foto
+                    _uiState.value = _uiState.value.copy(
+                        userName = userName,
+                        userProfilePhoto = userPhoto
+                    )
+
+                    // Cargar carpetas
+                    android.util.Log.d("HomeViewModel", "Loading carpetas for userId: $userId")
+                    val carpetasResult = getCarpetasRaizUseCase(userId).firstOrNull()
+                    android.util.Log.d("HomeViewModel", "carpetasResult: $carpetasResult")
+                    carpetasResult?.onSuccess { carpetas ->
+                        android.util.Log.d("HomeViewModel", "Carpetas loaded: ${'$'}{carpetas.size} items")
+                        carpetas.forEach { carpeta ->
+                            android.util.Log.d("HomeViewModel", "  - ${'$'}{carpeta.nombreCarpeta} (${'$'}{carpeta.colorCarpeta})")
+                        }
+                        _uiState.value = _uiState.value.copy(
+                            recentFolders = carpetas, // Guardar TODAS las carpetas, no solo 5
+                            userName = userName
+                        )
+                        android.util.Log.d("HomeViewModel", "UI State updated with ${'$'}{_uiState.value.recentFolders.size} folders")
+                    }
+
+                    // Cargar apuntes
+                    getMyApunteUseCase(userId).collect { apuntesResult ->
+                        apuntesResult.onSuccess { apuntes ->
+                            android.util.Log.d("HomeViewModel", "Apuntes loaded: ${'$'}{apuntes.size} items")
+
+                            // Ordenar por más reciente (fechaActualizacion o fechaCreacion)
+                            val sortedApuntes = apuntes.sortedByDescending {
+                                it.fechaActualizacion ?: it.fechaCreacion
+                            }
+
+                            // Filtrar favoritos
+                            val favoritos = sortedApuntes.filter { it.isFavorito }
+
+                            _uiState.value = _uiState.value.copy(
+                                recentNotes = sortedApuntes.take(5),
+                                allNotes = sortedApuntes,
+                                favoriteNotes = favoritos,
+                                deletedNotes = emptyList()
+                            )
+                            updateHasContent()
+                        }.onFailure { error ->
+                            android.util.Log.e("HomeViewModel", "Error loading apuntes: ${'$'}{error.message}")
+                        }
+                    }
+                } else {
+                    android.util.Log.w("HomeViewModel", "No current user found")
+                    // No hay usuario actual, estado por defecto
+                    _uiState.value = HomeUiState(
+                        isLoading = false,
+                        hasContent = false,
+                        userName = "Usuario"
+                    )
+                }
+            }?.onFailure { error ->
+                android.util.Log.e("HomeViewModel", "Error loading user: ${'$'}{error.message}", error)
+                // Error al obtener usuario
+                _uiState.value = HomeUiState(
+                    isLoading = false,
+                    hasContent = false,
+                    userName = "Usuario"
+                )
+            } ?: run {
+                android.util.Log.w("HomeViewModel", "userResult is null")
+                // userResult es null
+                _uiState.value = HomeUiState(
+                    isLoading = false,
+                    hasContent = false,
+                    userName = "Usuario"
+                )
+            }
+        }
+    }
+
+    private fun updateHasContent() {
+        val currentState = _uiState.value
+        val hasContent = currentState.recentFolders.isNotEmpty() || currentState.recentNotes.isNotEmpty()
+        android.util.Log.d("HomeViewModel", "updateHasContent: folders=${'$'}{currentState.recentFolders.size}, notes=${'$'}{currentState.recentNotes.size}, hasContent=$hasContent")
+        _uiState.value = currentState.copy(
+            isLoading = false,
+            hasContent = hasContent
+        )
+    }
+
+    fun refresh() {
+        loadHomeData()
+    }
+
+    private fun loadMaterias() {
+        viewModelScope.launch {
+            materiaRepository.getAllMaterias()
+                .catch { e ->
+                    Log.e("HomeVM", "Error loading materias: ${e.message}", e)
+                }
+                .collect { result ->
+                    result.onSuccess { materias ->
+                        val materiasMap = materias.associateBy { it.id }
+                        _uiState.value = _uiState.value.copy(materias = materiasMap)
+                    }
+                }
+        }
+    }
+
+    fun createFolder(nombre: String, color: String) {
+        viewModelScope.launch {
+            android.util.Log.d("HomeViewModel", "createFolder called with nombre=$nombre, color=$color")
+
+            val result = createCarpetaUseCase(
+                nombreCarpeta = nombre,
+                colorCarpeta = color,
+                descripcion = null,
+                idCarpetaPadre = null,
+                idMateria = null
+            )
+
+            result.onSuccess { carpetaId ->
+                android.util.Log.d("HomeViewModel", "Carpeta created successfully with ID: $carpetaId")
+                // Dar tiempo para que Room emita el nuevo valor en el Flow
+                kotlinx.coroutines.delay(100)
+                // Recargar los datos después de crear la carpeta
+                refresh()
+            }.onFailure { error ->
+                android.util.Log.e("HomeViewModel", "Error creating carpeta: ${'$'}{error.message}", error)
+                // Manejar el error (podrías agregar un estado de error al UiState)
+            }
+        }
+    }
+
+    fun runFirestoreTest() {
+        // Usamos viewModelScope, que sí está disponible aquí.
+        viewModelScope.launch {
+            try {
+                Log.d("FirestoreTest", "🔥 Iniciando test desde el ViewModel...")
+
+                val testData = hashMapOf(
+                    "titulo" to "Test Apunte desde ViewModel",
+                    "contenido" to "Contenido de prueba exitoso",
+                    "timestamp" to System.currentTimeMillis(),
+                    "userId" to (FirebaseAuth.getInstance().currentUser?.uid ?: "test_user_id")
+                )
+
+                // Obtenemos la instancia de Firestore aquí, en la capa correcta.
+                FirebaseFirestore.getInstance()
+                    .collection("apuntes_test")
+                    .add(testData)
+                    .addOnSuccessListener { docRef ->
+                        Log.d("FirestoreTest", "✅✅✅ DOCUMENTO CREADO: ${docRef.id}")
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("FirestoreTest", "❌❌❌ ERROR: ${e.message}", e)
+                    }
+                    .await() // await() suspende la corrutina hasta que la tarea se complete.
+
+                Log.d("FirestoreTest", "✅ Test completado desde el ViewModel.")
+
+            } catch (e: Exception) {
+                Log.e("FirestoreTest", "❌ Error en el test del ViewModel", e)
+            }
+        }
+    }
+}

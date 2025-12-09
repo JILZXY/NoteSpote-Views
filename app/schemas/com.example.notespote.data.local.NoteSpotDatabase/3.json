@@ -1,0 +1,1147 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 3,
+    "identityHash": "a55714d7155592bdc3ddd445892328f9",
+    "entities": [
+      {
+        "tableName": "usuario",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id_usuario` TEXT NOT NULL, `nombre` TEXT, `apellido` TEXT, `email` TEXT NOT NULL, `password` BLOB, `nombre_usuario` TEXT NOT NULL, `foto_perfil` TEXT, `biografia` TEXT, `fecha_registro` INTEGER NOT NULL, `ultima_conexion` INTEGER, `total_likes_recibidos` INTEGER NOT NULL, `total_seguidores` INTEGER NOT NULL, `total_seguidos` INTEGER NOT NULL, `sync_status` TEXT NOT NULL, `last_sync` INTEGER, `is_deleted` INTEGER NOT NULL, PRIMARY KEY(`id_usuario`))",
+        "fields": [
+          {
+            "fieldPath": "idUsuario",
+            "columnName": "id_usuario",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nombre",
+            "columnName": "nombre",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "apellido",
+            "columnName": "apellido",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "email",
+            "columnName": "email",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "password",
+            "columnName": "password",
+            "affinity": "BLOB",
+            "notNull": false
+          },
+          {
+            "fieldPath": "nombreUsuario",
+            "columnName": "nombre_usuario",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fotoPerfil",
+            "columnName": "foto_perfil",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "biografia",
+            "columnName": "biografia",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "fechaRegistro",
+            "columnName": "fecha_registro",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ultimaConexion",
+            "columnName": "ultima_conexion",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "totalLikesRecibidos",
+            "columnName": "total_likes_recibidos",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "totalSeguidores",
+            "columnName": "total_seguidores",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "totalSeguidos",
+            "columnName": "total_seguidos",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "syncStatus",
+            "columnName": "sync_status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastSync",
+            "columnName": "last_sync",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "isDeleted",
+            "columnName": "is_deleted",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id_usuario"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_usuario_email",
+            "unique": true,
+            "columnNames": [
+              "email"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_usuario_email` ON `${TABLE_NAME}` (`email`)"
+          },
+          {
+            "name": "index_usuario_nombre_usuario",
+            "unique": true,
+            "columnNames": [
+              "nombre_usuario"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_usuario_nombre_usuario` ON `${TABLE_NAME}` (`nombre_usuario`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "materia",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id_materia` TEXT NOT NULL, `nombre_materia` TEXT NOT NULL, `categoria` TEXT, `descripcion` TEXT, `icono` TEXT, `sync_status` TEXT NOT NULL, `is_deleted` INTEGER NOT NULL, PRIMARY KEY(`id_materia`))",
+        "fields": [
+          {
+            "fieldPath": "idMateria",
+            "columnName": "id_materia",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nombreMateria",
+            "columnName": "nombre_materia",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "categoria",
+            "columnName": "categoria",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "descripcion",
+            "columnName": "descripcion",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "icono",
+            "columnName": "icono",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "syncStatus",
+            "columnName": "sync_status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isDeleted",
+            "columnName": "is_deleted",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id_materia"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_materia_nombre_materia",
+            "unique": false,
+            "columnNames": [
+              "nombre_materia"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_materia_nombre_materia` ON `${TABLE_NAME}` (`nombre_materia`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "carpeta",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id_carpeta` TEXT NOT NULL, `id_usuario` TEXT NOT NULL, `id_materia` TEXT, `id_carpeta_padre` TEXT, `nombre_carpeta` TEXT NOT NULL, `color_carpeta` TEXT, `descripcion` TEXT, `fecha_creacion` INTEGER NOT NULL, `orden` INTEGER NOT NULL, `sync_status` TEXT NOT NULL, `last_sync` INTEGER, `is_deleted` INTEGER NOT NULL, PRIMARY KEY(`id_carpeta`), FOREIGN KEY(`id_usuario`) REFERENCES `usuario`(`id_usuario`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`id_materia`) REFERENCES `materia`(`id_materia`) ON UPDATE NO ACTION ON DELETE SET NULL , FOREIGN KEY(`id_carpeta_padre`) REFERENCES `carpeta`(`id_carpeta`) ON UPDATE NO ACTION ON DELETE SET NULL )",
+        "fields": [
+          {
+            "fieldPath": "idCarpeta",
+            "columnName": "id_carpeta",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "idUsuario",
+            "columnName": "id_usuario",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "idMateria",
+            "columnName": "id_materia",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "idCarpetaPadre",
+            "columnName": "id_carpeta_padre",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "nombreCarpeta",
+            "columnName": "nombre_carpeta",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "colorCarpeta",
+            "columnName": "color_carpeta",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "descripcion",
+            "columnName": "descripcion",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "fechaCreacion",
+            "columnName": "fecha_creacion",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "orden",
+            "columnName": "orden",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "syncStatus",
+            "columnName": "sync_status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastSync",
+            "columnName": "last_sync",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "isDeleted",
+            "columnName": "is_deleted",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id_carpeta"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_carpeta_id_usuario",
+            "unique": false,
+            "columnNames": [
+              "id_usuario"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_carpeta_id_usuario` ON `${TABLE_NAME}` (`id_usuario`)"
+          },
+          {
+            "name": "index_carpeta_id_materia",
+            "unique": false,
+            "columnNames": [
+              "id_materia"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_carpeta_id_materia` ON `${TABLE_NAME}` (`id_materia`)"
+          },
+          {
+            "name": "index_carpeta_id_carpeta_padre",
+            "unique": false,
+            "columnNames": [
+              "id_carpeta_padre"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_carpeta_id_carpeta_padre` ON `${TABLE_NAME}` (`id_carpeta_padre`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "usuario",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "id_usuario"
+            ],
+            "referencedColumns": [
+              "id_usuario"
+            ]
+          },
+          {
+            "table": "materia",
+            "onDelete": "SET NULL",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "id_materia"
+            ],
+            "referencedColumns": [
+              "id_materia"
+            ]
+          },
+          {
+            "table": "carpeta",
+            "onDelete": "SET NULL",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "id_carpeta_padre"
+            ],
+            "referencedColumns": [
+              "id_carpeta"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "apunte",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id_apunte` TEXT NOT NULL, `id_usuario` TEXT NOT NULL, `id_materia` TEXT, `id_carpeta` TEXT, `titulo` TEXT NOT NULL, `descripcion` TEXT, `contenido` TEXT, `tipo_visibilidad` TEXT NOT NULL, `es_original` INTEGER NOT NULL, `id_apunte_original` TEXT, `id_usuario_original` TEXT, `total_likes` INTEGER NOT NULL, `total_guardados` INTEGER NOT NULL, `fecha_creacion` INTEGER NOT NULL, `fecha_actualizacion` INTEGER, `tiene_dibujos` INTEGER NOT NULL, `tiene_imagenes` INTEGER NOT NULL, `tiene_postits` INTEGER NOT NULL, `is_favorito` INTEGER NOT NULL, `sync_status` TEXT NOT NULL, `last_sync` INTEGER, `is_deleted` INTEGER NOT NULL, PRIMARY KEY(`id_apunte`), FOREIGN KEY(`id_usuario`) REFERENCES `usuario`(`id_usuario`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`id_materia`) REFERENCES `materia`(`id_materia`) ON UPDATE NO ACTION ON DELETE SET NULL , FOREIGN KEY(`id_carpeta`) REFERENCES `carpeta`(`id_carpeta`) ON UPDATE NO ACTION ON DELETE SET NULL )",
+        "fields": [
+          {
+            "fieldPath": "idApunte",
+            "columnName": "id_apunte",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "idUsuario",
+            "columnName": "id_usuario",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "idMateria",
+            "columnName": "id_materia",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "idCarpeta",
+            "columnName": "id_carpeta",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "titulo",
+            "columnName": "titulo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "descripcion",
+            "columnName": "descripcion",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "contenido",
+            "columnName": "contenido",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "tipoVisibilidad",
+            "columnName": "tipo_visibilidad",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "esOriginal",
+            "columnName": "es_original",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "idApunteOriginal",
+            "columnName": "id_apunte_original",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "idUsuarioOriginal",
+            "columnName": "id_usuario_original",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "totalLikes",
+            "columnName": "total_likes",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "totalGuardados",
+            "columnName": "total_guardados",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fechaCreacion",
+            "columnName": "fecha_creacion",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fechaActualizacion",
+            "columnName": "fecha_actualizacion",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "tieneDibujos",
+            "columnName": "tiene_dibujos",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tieneImagenes",
+            "columnName": "tiene_imagenes",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tienePostits",
+            "columnName": "tiene_postits",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isFavorito",
+            "columnName": "is_favorito",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "syncStatus",
+            "columnName": "sync_status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastSync",
+            "columnName": "last_sync",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "isDeleted",
+            "columnName": "is_deleted",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id_apunte"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_apunte_id_usuario",
+            "unique": false,
+            "columnNames": [
+              "id_usuario"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_apunte_id_usuario` ON `${TABLE_NAME}` (`id_usuario`)"
+          },
+          {
+            "name": "index_apunte_id_materia",
+            "unique": false,
+            "columnNames": [
+              "id_materia"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_apunte_id_materia` ON `${TABLE_NAME}` (`id_materia`)"
+          },
+          {
+            "name": "index_apunte_id_carpeta",
+            "unique": false,
+            "columnNames": [
+              "id_carpeta"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_apunte_id_carpeta` ON `${TABLE_NAME}` (`id_carpeta`)"
+          },
+          {
+            "name": "index_apunte_tipo_visibilidad",
+            "unique": false,
+            "columnNames": [
+              "tipo_visibilidad"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_apunte_tipo_visibilidad` ON `${TABLE_NAME}` (`tipo_visibilidad`)"
+          },
+          {
+            "name": "index_apunte_fecha_creacion",
+            "unique": false,
+            "columnNames": [
+              "fecha_creacion"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_apunte_fecha_creacion` ON `${TABLE_NAME}` (`fecha_creacion`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "usuario",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "id_usuario"
+            ],
+            "referencedColumns": [
+              "id_usuario"
+            ]
+          },
+          {
+            "table": "materia",
+            "onDelete": "SET NULL",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "id_materia"
+            ],
+            "referencedColumns": [
+              "id_materia"
+            ]
+          },
+          {
+            "table": "carpeta",
+            "onDelete": "SET NULL",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "id_carpeta"
+            ],
+            "referencedColumns": [
+              "id_carpeta"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "postit",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id_postit` TEXT NOT NULL, `id_apunte` TEXT NOT NULL, `titulo_postit` TEXT, `contenido_postit` TEXT, `color` TEXT NOT NULL, `posicion_x` INTEGER NOT NULL, `posicion_y` INTEGER NOT NULL, `ancho` INTEGER NOT NULL, `alto` INTEGER NOT NULL, `fecha_creacion` INTEGER NOT NULL, `orden_z` INTEGER NOT NULL, `sync_status` TEXT NOT NULL, `is_deleted` INTEGER NOT NULL, PRIMARY KEY(`id_postit`), FOREIGN KEY(`id_apunte`) REFERENCES `apunte`(`id_apunte`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "idPostit",
+            "columnName": "id_postit",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "idApunte",
+            "columnName": "id_apunte",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tituloPostit",
+            "columnName": "titulo_postit",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "contenidoPostit",
+            "columnName": "contenido_postit",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "color",
+            "columnName": "color",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "posicionX",
+            "columnName": "posicion_x",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "posicionY",
+            "columnName": "posicion_y",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ancho",
+            "columnName": "ancho",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "alto",
+            "columnName": "alto",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fechaCreacion",
+            "columnName": "fecha_creacion",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ordenZ",
+            "columnName": "orden_z",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "syncStatus",
+            "columnName": "sync_status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isDeleted",
+            "columnName": "is_deleted",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id_postit"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_postit_id_apunte",
+            "unique": false,
+            "columnNames": [
+              "id_apunte"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_postit_id_apunte` ON `${TABLE_NAME}` (`id_apunte`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "apunte",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "id_apunte"
+            ],
+            "referencedColumns": [
+              "id_apunte"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "archivo_adjunto",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id_archivo` TEXT NOT NULL, `id_apunte` TEXT NOT NULL, `nombre_archivo` TEXT NOT NULL, `tipo_archivo` TEXT NOT NULL, `ruta_local` TEXT, `url_firebase` TEXT, `tamano_kb` INTEGER NOT NULL, `fecha_subida` INTEGER NOT NULL, `estado_descarga` TEXT NOT NULL, `sync_status` TEXT NOT NULL, `is_deleted` INTEGER NOT NULL, PRIMARY KEY(`id_archivo`), FOREIGN KEY(`id_apunte`) REFERENCES `apunte`(`id_apunte`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "idArchivo",
+            "columnName": "id_archivo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "idApunte",
+            "columnName": "id_apunte",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nombreArchivo",
+            "columnName": "nombre_archivo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tipoArchivo",
+            "columnName": "tipo_archivo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rutaLocal",
+            "columnName": "ruta_local",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "urlFirebase",
+            "columnName": "url_firebase",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "tamanoKb",
+            "columnName": "tamano_kb",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fechaSubida",
+            "columnName": "fecha_subida",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "estadoDescarga",
+            "columnName": "estado_descarga",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "syncStatus",
+            "columnName": "sync_status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isDeleted",
+            "columnName": "is_deleted",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id_archivo"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_archivo_adjunto_id_apunte",
+            "unique": false,
+            "columnNames": [
+              "id_apunte"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_archivo_adjunto_id_apunte` ON `${TABLE_NAME}` (`id_apunte`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "apunte",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "id_apunte"
+            ],
+            "referencedColumns": [
+              "id_apunte"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "like_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id_like` TEXT NOT NULL, `id_usuario` TEXT NOT NULL, `id_apunte` TEXT NOT NULL, `fecha_like` INTEGER NOT NULL, `sync_status` TEXT NOT NULL, `is_deleted` INTEGER NOT NULL, PRIMARY KEY(`id_like`), FOREIGN KEY(`id_usuario`) REFERENCES `usuario`(`id_usuario`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`id_apunte`) REFERENCES `apunte`(`id_apunte`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "idLike",
+            "columnName": "id_like",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "idUsuario",
+            "columnName": "id_usuario",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "idApunte",
+            "columnName": "id_apunte",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fechaLike",
+            "columnName": "fecha_like",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "syncStatus",
+            "columnName": "sync_status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isDeleted",
+            "columnName": "is_deleted",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id_like"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_like_table_id_usuario_id_apunte",
+            "unique": true,
+            "columnNames": [
+              "id_usuario",
+              "id_apunte"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_like_table_id_usuario_id_apunte` ON `${TABLE_NAME}` (`id_usuario`, `id_apunte`)"
+          },
+          {
+            "name": "index_like_table_id_usuario",
+            "unique": false,
+            "columnNames": [
+              "id_usuario"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_like_table_id_usuario` ON `${TABLE_NAME}` (`id_usuario`)"
+          },
+          {
+            "name": "index_like_table_id_apunte",
+            "unique": false,
+            "columnNames": [
+              "id_apunte"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_like_table_id_apunte` ON `${TABLE_NAME}` (`id_apunte`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "usuario",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "id_usuario"
+            ],
+            "referencedColumns": [
+              "id_usuario"
+            ]
+          },
+          {
+            "table": "apunte",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "id_apunte"
+            ],
+            "referencedColumns": [
+              "id_apunte"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "etiqueta",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id_etiqueta` TEXT NOT NULL, `nombre_etiqueta` TEXT NOT NULL, `veces_usada` INTEGER NOT NULL, `sync_status` TEXT NOT NULL, PRIMARY KEY(`id_etiqueta`))",
+        "fields": [
+          {
+            "fieldPath": "idEtiqueta",
+            "columnName": "id_etiqueta",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nombreEtiqueta",
+            "columnName": "nombre_etiqueta",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "vecesUsada",
+            "columnName": "veces_usada",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "syncStatus",
+            "columnName": "sync_status",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id_etiqueta"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_etiqueta_nombre_etiqueta",
+            "unique": true,
+            "columnNames": [
+              "nombre_etiqueta"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_etiqueta_nombre_etiqueta` ON `${TABLE_NAME}` (`nombre_etiqueta`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "etiqueta_apunte",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id_etiqueta_apunte` TEXT NOT NULL, `id_apunte` TEXT NOT NULL, `id_etiqueta` TEXT NOT NULL, `sync_status` TEXT NOT NULL, `is_deleted` INTEGER NOT NULL, PRIMARY KEY(`id_etiqueta_apunte`), FOREIGN KEY(`id_apunte`) REFERENCES `apunte`(`id_apunte`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`id_etiqueta`) REFERENCES `etiqueta`(`id_etiqueta`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "idEtiquetaApunte",
+            "columnName": "id_etiqueta_apunte",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "idApunte",
+            "columnName": "id_apunte",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "idEtiqueta",
+            "columnName": "id_etiqueta",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "syncStatus",
+            "columnName": "sync_status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isDeleted",
+            "columnName": "is_deleted",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id_etiqueta_apunte"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_etiqueta_apunte_id_apunte_id_etiqueta",
+            "unique": true,
+            "columnNames": [
+              "id_apunte",
+              "id_etiqueta"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_etiqueta_apunte_id_apunte_id_etiqueta` ON `${TABLE_NAME}` (`id_apunte`, `id_etiqueta`)"
+          },
+          {
+            "name": "index_etiqueta_apunte_id_apunte",
+            "unique": false,
+            "columnNames": [
+              "id_apunte"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_etiqueta_apunte_id_apunte` ON `${TABLE_NAME}` (`id_apunte`)"
+          },
+          {
+            "name": "index_etiqueta_apunte_id_etiqueta",
+            "unique": false,
+            "columnNames": [
+              "id_etiqueta"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_etiqueta_apunte_id_etiqueta` ON `${TABLE_NAME}` (`id_etiqueta`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "apunte",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "id_apunte"
+            ],
+            "referencedColumns": [
+              "id_apunte"
+            ]
+          },
+          {
+            "table": "etiqueta",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "id_etiqueta"
+            ],
+            "referencedColumns": [
+              "id_etiqueta"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "seguimiento",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id_seguimiento` TEXT NOT NULL, `id_seguidor` TEXT NOT NULL, `id_seguido` TEXT NOT NULL, `fecha_seguimiento` INTEGER NOT NULL, `sync_status` TEXT NOT NULL, `is_deleted` INTEGER NOT NULL, PRIMARY KEY(`id_seguimiento`), FOREIGN KEY(`id_seguidor`) REFERENCES `usuario`(`id_usuario`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`id_seguido`) REFERENCES `usuario`(`id_usuario`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "idSeguimiento",
+            "columnName": "id_seguimiento",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "idSeguidor",
+            "columnName": "id_seguidor",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "idSeguido",
+            "columnName": "id_seguido",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fechaSeguimiento",
+            "columnName": "fecha_seguimiento",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "syncStatus",
+            "columnName": "sync_status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isDeleted",
+            "columnName": "is_deleted",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id_seguimiento"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_seguimiento_id_seguidor_id_seguido",
+            "unique": true,
+            "columnNames": [
+              "id_seguidor",
+              "id_seguido"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_seguimiento_id_seguidor_id_seguido` ON `${TABLE_NAME}` (`id_seguidor`, `id_seguido`)"
+          },
+          {
+            "name": "index_seguimiento_id_seguidor",
+            "unique": false,
+            "columnNames": [
+              "id_seguidor"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_seguimiento_id_seguidor` ON `${TABLE_NAME}` (`id_seguidor`)"
+          },
+          {
+            "name": "index_seguimiento_id_seguido",
+            "unique": false,
+            "columnNames": [
+              "id_seguido"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_seguimiento_id_seguido` ON `${TABLE_NAME}` (`id_seguido`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "usuario",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "id_seguidor"
+            ],
+            "referencedColumns": [
+              "id_usuario"
+            ]
+          },
+          {
+            "table": "usuario",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "id_seguido"
+            ],
+            "referencedColumns": [
+              "id_usuario"
+            ]
+          }
+        ]
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'a55714d7155592bdc3ddd445892328f9')"
+    ]
+  }
+}
