@@ -10,6 +10,11 @@ class UpdateProfilePhotoUseCase @Inject constructor(
     private val authRepository: AuthRepository
 ) {
     suspend operator fun invoke(photoUri: Uri): Result<String> {
+        // Forzar la actualización del token antes de la operación
+        authRepository.forceTokenRefresh().onFailure {
+            return Result.failure(it)
+        }
+
         val userId = authRepository.getCurrentUserId()
             ?: return Result.failure(Exception("Usuario no autenticado"))
 

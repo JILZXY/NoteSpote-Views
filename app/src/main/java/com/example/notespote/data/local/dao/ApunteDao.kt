@@ -32,6 +32,9 @@ interface ApunteDao {
 
     @Query("SELECT * FROM apunte WHERE tipo_visibilidad = 'PUBLICO' AND is_deleted = 0 ORDER BY total_likes DESC LIMIT :limit")
     fun getPublicApuntes(limit: Int = 50): Flow<List<ApunteEntity>>
+    
+    @Query("SELECT * FROM apunte WHERE is_deleted = 0 AND id_usuario = :userId ORDER BY fecha_actualizacion DESC LIMIT :limit")
+    fun getRecentApuntes(userId: String, limit: Int): Flow<List<ApunteEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(apunte: ApunteEntity)

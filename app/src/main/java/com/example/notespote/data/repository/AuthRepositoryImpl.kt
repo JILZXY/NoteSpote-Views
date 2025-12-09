@@ -177,4 +177,14 @@ class AuthRepositoryImpl @Inject constructor(
     override fun getCurrentUserId(): String? {
         return auth.currentUser?.uid
     }
+
+    override suspend fun forceTokenRefresh(): Result<Unit> = withContext(Dispatchers.IO) {
+        try {
+            auth.currentUser?.getIdToken(true)?.await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Log.e("AuthRepository", "Error refreshing token", e)
+            Result.failure(e)
+        }
+    }
 }

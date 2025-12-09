@@ -24,4 +24,5 @@ interface AuthRepository {
     ): Result<Unit>
     suspend fun verificarEmail(): Result<Unit>
     fun getCurrentUserId(): String?
+    suspend fun forceTokenRefresh(): Result<Unit>
 }

@@ -18,4 +18,5 @@ interface ApunteRepository {
     suspend fun guardarApunte(apunteId: String): Result<Unit>
     suspend fun toggleLike(apunteId: String, userId: String): Result<Unit>
     suspend fun syncApuntes(): Result<Unit>
+    fun getRecentApuntes(userId: String, limit: Int): Flow<Result<List<Apunte>>>
 }

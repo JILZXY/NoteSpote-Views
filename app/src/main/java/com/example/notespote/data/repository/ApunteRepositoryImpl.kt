@@ -307,4 +307,14 @@ class ApunteRepositoryImpl @Inject constructor(
             storageRef.downloadUrl.await().toString()
         }
     }
+
+    override fun getRecentApuntes(userId: String, limit: Int): Flow<Result<List<Apunte>>> {
+        return apunteDao.getRecentApuntes(userId, limit)
+            .map { entities ->
+                Result.success(entities.map { apunteMapper.toDomain(it) })
+            }
+            .catch { e ->
+                emit(Result.failure(e))
+            }
+    }
 }

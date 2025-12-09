@@ -92,6 +92,10 @@ dependencies {
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.storage) // Asegúrate de tenerlo en libs.toml
     implementation(libs.firebase.crashlytics)
+    implementation("com.google.firebase:firebase-appcheck")
+    implementation("com.google.firebase:firebase-appcheck-playintegrity")
+    debugImplementation("com.google.firebase:firebase-appcheck-debug")
+
 
     // --- Otras Librerías (Coil, POI, etc.) ---
     implementation(libs.coil.compose)
