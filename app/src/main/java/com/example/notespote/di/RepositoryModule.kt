@@ -5,6 +5,7 @@ import com.example.notespote.data.repository.AuthRepositoryImpl
 import com.example.notespote.data.repository.CarpetaRepositoryImpl
 import com.example.notespote.data.repository.EtiquetaRepositoryImpl
 import com.example.notespote.data.repository.LikeRepositoryImpl
+import com.example.notespote.data.repository.MateriaRepositoryImpl
 import com.example.notespote.data.repository.PostitRepositoryImpl
 import com.example.notespote.data.repository.SeguimientoRepositoryImpl
 import com.example.notespote.data.repository.SyncRepositoryImpl
@@ -14,6 +15,7 @@ import com.example.notespote.domain.repository.AuthRepository
 import com.example.notespote.domain.repository.CarpetaRepository
 import com.example.notespote.domain.repository.EtiquetaRepository
 import com.example.notespote.domain.repository.LikeRepository
+import com.example.notespote.domain.repository.MateriaRepository
 import com.example.notespote.domain.repository.PostitRepository
 import com.example.notespote.domain.repository.SeguimientoRepository
 import com.example.notespote.domain.repository.SyncRepository
@@ -81,4 +83,10 @@ abstract class RepositoryModule {
     abstract fun bindSyncRepository(
         syncRepositoryImpl: SyncRepositoryImpl
     ): SyncRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindMateriaRepository(
+        materiaRepositoryImpl: MateriaRepositoryImpl
+    ): MateriaRepository
 }

@@ -9,6 +9,7 @@ import com.example.notespote.domain.model.Carpeta
 import com.example.notespote.domain.repository.ApunteRepository
 import com.example.notespote.domain.repository.AuthRepository
 import com.example.notespote.domain.repository.CarpetaRepository
+import com.example.notespote.domain.repository.MateriaRepository
 import com.example.notespote.domain.usecases.auth.GetCurrentUserUseCase
 import com.example.notespote.domain.usecases.folders.CreateCarpetaUseCase
 import com.example.notespote.domain.usecases.folders.GetCarpetasRaizUseCase
@@ -33,7 +34,8 @@ class HomeViewModel @Inject constructor(
     private val syncAllUseCase: SyncAllUseCase,
     private val carpetaRepository: CarpetaRepository,
     private val apunteRepository: ApunteRepository,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val materiaRepository: MateriaRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
@@ -46,6 +48,7 @@ class HomeViewModel @Inject constructor(
         loadHomeData()
         observeCarpetas()
         loadUserData()
+        loadMaterias()
     }
 
     private fun syncDataFromFirebase() {
@@ -55,7 +58,7 @@ class HomeViewModel @Inject constructor(
                 syncAllUseCase().onSuccess {
                     android.util.Log.d("HomeViewModel", "Sincronización completada exitosamente")
                 }.onFailure { error ->
-                    android.util.Log.e("HomeViewModel", "Error en sincronización: ${error.message}", error)
+                    android.util.Log.e("HomeViewModel", "Error en sincronización: ${'$'}{error.message}", error)
                 }
             } catch (e: Exception) {
                 android.util.Log.e("HomeViewModel", "Excepción durante sincronización", e)
@@ -78,7 +81,7 @@ class HomeViewModel @Inject constructor(
                         // Ahora observamos las carpetas continuamente
                         getCarpetasRaizUseCase(usuario.id).collect { carpetasResult ->
                             carpetasResult.onSuccess { carpetas ->
-                                android.util.Log.d("HomeViewModel", "Carpetas actualizadas: ${carpetas.size} items")
+                                android.util.Log.d("HomeViewModel", "Carpetas actualizadas: ${'$'}{carpetas.size} items")
                                 _uiState.value = _uiState.value.copy(
                                     recentFolders = carpetas,
                                     isLoading = false
@@ -105,7 +108,7 @@ class HomeViewModel @Inject constructor(
                     // ✅ Cargar carpetas
                     carpetaRepository.getCarpetasRaiz(userId)
                         .catch { e ->
-                            Log.e("HomeVM", "Error carpetas: ${e.message}", e)
+                            Log.e("HomeVM", "Error carpetas: ${'$'}{e.message}", e)
                         }
                         .collect { result ->
                             result.onSuccess { carpetas ->
@@ -118,19 +121,30 @@ class HomeViewModel @Inject constructor(
                     // ✅ Cargar apuntes
                     apunteRepository.getApuntesByUser(userId)
                         .catch { e ->
-                            Log.e("HomeVM", "Error apuntes: ${e.message}", e)
+                            Log.e("HomeVM", "Error apuntes: ${'$'}{e.message}", e)
                         }
                         .collect { result ->
                             result.onSuccess { apuntes ->
+                                // Ordenar por más reciente (fechaActualizacion o fechaCreacion)
+                                val sortedApuntes = apuntes.sortedByDescending {
+                                    it.fechaActualizacion ?: it.fechaCreacion
+                                }
+
+                                // Filtrar favoritos
+                                val favoritos = sortedApuntes.filter { it.isFavorito }
+
                                 _uiState.value = _uiState.value.copy(
-                                    recentNotes = apuntes.take(5),
-                                    hasContent =  apuntes.isNotEmpty()
+                                    recentNotes = sortedApuntes.take(5),
+                                    allNotes = sortedApuntes,
+                                    favoriteNotes = favoritos,
+                                    deletedNotes = emptyList(),
+                                    hasContent = sortedApuntes.isNotEmpty()
                                 )
                             }
                         }
                 }
             } catch (e: Exception) {
-                Log.e("HomeVM", "Error general: ${e.message}", e)
+                Log.e("HomeVM", "Error general: ${'$'}{e.message}", e)
             }
         }
     }
@@ -144,12 +158,12 @@ class HomeViewModel @Inject constructor(
             android.util.Log.d("HomeViewModel", "userResult: $userResult")
 
             userResult?.onSuccess { usuario ->
-                android.util.Log.d("HomeViewModel", "Usuario obtenido: ${usuario?.id}")
+                android.util.Log.d("HomeViewModel", "Usuario obtenido: ${'$'}{usuario?.id}")
                 if (usuario != null) {
                     // Tenemos un usuario, cargamos sus datos
                     val userId = usuario.id
                     val userName = if (!usuario.nombre.isNullOrBlank() && !usuario.apellido.isNullOrBlank()) {
-                        "${usuario.nombre} ${usuario.apellido}"
+                        "${'$'}{usuario.nombre} ${'$'}{usuario.apellido}"
                     } else if (!usuario.nombre.isNullOrBlank()) {
                         usuario.nombre
                     } else {
@@ -168,27 +182,39 @@ class HomeViewModel @Inject constructor(
                     val carpetasResult = getCarpetasRaizUseCase(userId).firstOrNull()
                     android.util.Log.d("HomeViewModel", "carpetasResult: $carpetasResult")
                     carpetasResult?.onSuccess { carpetas ->
-                        android.util.Log.d("HomeViewModel", "Carpetas loaded: ${carpetas.size} items")
+                        android.util.Log.d("HomeViewModel", "Carpetas loaded: ${'$'}{carpetas.size} items")
                         carpetas.forEach { carpeta ->
-                            android.util.Log.d("HomeViewModel", "  - ${carpeta.nombreCarpeta} (${carpeta.colorCarpeta})")
+                            android.util.Log.d("HomeViewModel", "  - ${'$'}{carpeta.nombreCarpeta} (${'$'}{carpeta.colorCarpeta})")
                         }
                         _uiState.value = _uiState.value.copy(
                             recentFolders = carpetas, // Guardar TODAS las carpetas, no solo 5
                             userName = userName
                         )
-                        android.util.Log.d("HomeViewModel", "UI State updated with ${_uiState.value.recentFolders.size} folders")
+                        android.util.Log.d("HomeViewModel", "UI State updated with ${'$'}{_uiState.value.recentFolders.size} folders")
                     }
 
                     // Cargar apuntes
                     getMyApunteUseCase(userId).collect { apuntesResult ->
                         apuntesResult.onSuccess { apuntes ->
-                            android.util.Log.d("HomeViewModel", "Apuntes loaded: ${apuntes.size} items")
+                            android.util.Log.d("HomeViewModel", "Apuntes loaded: ${'$'}{apuntes.size} items")
+
+                            // Ordenar por más reciente (fechaActualizacion o fechaCreacion)
+                            val sortedApuntes = apuntes.sortedByDescending {
+                                it.fechaActualizacion ?: it.fechaCreacion
+                            }
+
+                            // Filtrar favoritos
+                            val favoritos = sortedApuntes.filter { it.isFavorito }
+
                             _uiState.value = _uiState.value.copy(
-                                recentNotes = apuntes.take(5)
+                                recentNotes = sortedApuntes.take(5),
+                                allNotes = sortedApuntes,
+                                favoriteNotes = favoritos,
+                                deletedNotes = emptyList()
                             )
                             updateHasContent()
                         }.onFailure { error ->
-                            android.util.Log.e("HomeViewModel", "Error loading apuntes: ${error.message}")
+                            android.util.Log.e("HomeViewModel", "Error loading apuntes: ${'$'}{error.message}")
                         }
                     }
                 } else {
@@ -201,7 +227,7 @@ class HomeViewModel @Inject constructor(
                     )
                 }
             }?.onFailure { error ->
-                android.util.Log.e("HomeViewModel", "Error loading user: ${error.message}", error)
+                android.util.Log.e("HomeViewModel", "Error loading user: ${'$'}{error.message}", error)
                 // Error al obtener usuario
                 _uiState.value = HomeUiState(
                     isLoading = false,
@@ -223,7 +249,7 @@ class HomeViewModel @Inject constructor(
     private fun updateHasContent() {
         val currentState = _uiState.value
         val hasContent = currentState.recentFolders.isNotEmpty() || currentState.recentNotes.isNotEmpty()
-        android.util.Log.d("HomeViewModel", "updateHasContent: folders=${currentState.recentFolders.size}, notes=${currentState.recentNotes.size}, hasContent=$hasContent")
+        android.util.Log.d("HomeViewModel", "updateHasContent: folders=${'$'}{currentState.recentFolders.size}, notes=${'$'}{currentState.recentNotes.size}, hasContent=$hasContent")
         _uiState.value = currentState.copy(
             isLoading = false,
             hasContent = hasContent
@@ -232,6 +258,21 @@ class HomeViewModel @Inject constructor(
 
     fun refresh() {
         loadHomeData()
+    }
+
+    private fun loadMaterias() {
+        viewModelScope.launch {
+            materiaRepository.getAllMaterias()
+                .catch { e ->
+                    Log.e("HomeVM", "Error loading materias: ${e.message}", e)
+                }
+                .collect { result ->
+                    result.onSuccess { materias ->
+                        val materiasMap = materias.associateBy { it.id }
+                        _uiState.value = _uiState.value.copy(materias = materiasMap)
+                    }
+                }
+        }
     }
 
     fun createFolder(nombre: String, color: String) {
@@ -253,18 +294,9 @@ class HomeViewModel @Inject constructor(
                 // Recargar los datos después de crear la carpeta
                 refresh()
             }.onFailure { error ->
-                android.util.Log.e("HomeViewModel", "Error creating carpeta: ${error.message}", error)
+                android.util.Log.e("HomeViewModel", "Error creating carpeta: ${'$'}{error.message}", error)
                 // Manejar el error (podrías agregar un estado de error al UiState)
             }
         }
     }
 }
-
-data class HomeUiState(
-    val isLoading: Boolean = false,
-    val userName: String = "",
-    val userProfilePhoto: String? = null,
-    val recentFolders: List<Carpeta> = emptyList(),
-    val recentNotes: List<Apunte> = emptyList(),
-    val hasContent: Boolean = false
-)

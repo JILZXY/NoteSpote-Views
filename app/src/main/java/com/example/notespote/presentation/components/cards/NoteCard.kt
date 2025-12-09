@@ -14,9 +14,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -43,7 +46,9 @@ data class NoteCardData(
 fun NoteCard(
     note: NoteCardData,
     onClick: (() -> Unit)? = null,
-    onLongClick: (() -> Unit)? = null
+    onLongClick: (() -> Unit)? = null,
+    onFavoriteClick: (() -> Unit)? = null,
+    isFavorito: Boolean = false
 ) {
     Row(
         modifier = Modifier
@@ -64,13 +69,26 @@ fun NoteCard(
     ) {
         // Left Column for Text Content
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            // Top Row: Title, Hashtags, More Icon
+            // Top Row: Title, Hashtags, Favorite, More Icon
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(note.title, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 20.sp, fontFamily = OutfitFamily)
                 note.tags.forEach { (tag, color) ->
                     HashtagChip(text = tag, color = color)
                 }
                 Spacer(modifier = Modifier.weight(1f))
+                if (onFavoriteClick != null) {
+                    IconButton(
+                        onClick = { onFavoriteClick.invoke() },
+                        modifier = Modifier.size(24.dp)
+                    ) {
+                        Icon(
+                            imageVector = if (isFavorito) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                            contentDescription = if (isFavorito) "Quitar de favoritos" else "Agregar a favoritos",
+                            tint = if (isFavorito) Color(0xFFFF6B6B) else Color.White,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
                 Icon(Icons.Default.MoreVert, contentDescription = "Más opciones", tint = Color.White, modifier = Modifier.size(16.dp))
             }
             // Description

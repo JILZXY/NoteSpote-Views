@@ -17,6 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Notes
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -47,7 +48,7 @@ import com.example.notespote.viewModel.HomeViewModel
 @Composable
 fun AllFoldersView(
     onBackClick: () -> Unit,
-    onFolderClick: () -> Unit,
+    onFolderClick: (String) -> Unit,
     viewModel: HomeViewModel,
     carpetaViewModel: CarpetaViewModel = hiltViewModel()
 ) {
@@ -60,7 +61,7 @@ fun AllFoldersView(
     val defaultFolders = listOf(
         FolderCardData("Recientes", Color(0xFF97DECC), Icons.Default.History),
         FolderCardData("Favoritos", Color(0xFFFFF347), Icons.Default.Star),
-        FolderCardData("Todos los archivos", Color(0xFFFD99FF), Icons.Default.Folder)
+        FolderCardData("Todos los archivos", Color(0xFFFD99FF), Icons.Default.Notes)
     )
 
     // Convertir carpetas del usuario a pares (Carpeta, FolderCardData)
@@ -114,7 +115,16 @@ fun AllFoldersView(
             items(allFolders) { (carpeta, folderData) ->
                 FolderCard(
                     folder = folderData,
-                    onClick = { onFolderClick() },
+                    onClick = {
+                        // Determinar el ID de la carpeta
+                        val folderId = when (folderData.title) {
+                            "Recientes" -> com.example.notespote.presentation.navigation.Routes.FolderDetail.RECIENTES
+                            "Favoritos" -> com.example.notespote.presentation.navigation.Routes.FolderDetail.FAVORITOS
+                            "Todos los archivos" -> com.example.notespote.presentation.navigation.Routes.FolderDetail.TODOS
+                            else -> carpeta?.id ?: return@FolderCard
+                        }
+                        onFolderClick(folderId)
+                    },
                     onRename = carpeta?.let { { folderToUpdate = it } },
                     onDelete = carpeta?.let { { folderToDelete = it } }
                 )

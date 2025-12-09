@@ -8,6 +8,7 @@ data class Apunte(
     val idMateria: String? = null,
     val idCarpeta: String? = null,
     val titulo: String = "",
+    val descripcion: String? = null,
     val contenido: String? = null,
     val tipoVisibilidad: TipoVisibilidad = TipoVisibilidad.PRIVADO,
     val esOriginal: Boolean = true,
@@ -19,5 +20,6 @@ data class Apunte(
     val fechaActualizacion: Long? = null,
     val tieneDibujos: Boolean = false,
     val tieneImagenes: Boolean = false,
-    val tienePostits: Boolean = false
+    val tienePostits: Boolean = false,
+    val isFavorito: Boolean = false
 )

@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 3,
-    "identityHash": "77ce0f5705d627308f63252266859390",
+    "identityHash": "a55714d7155592bdc3ddd445892328f9",
     "entities": [
       {
         "tableName": "usuario",
@@ -349,7 +349,7 @@
       },
       {
         "tableName": "apunte",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id_apunte` TEXT NOT NULL, `id_usuario` TEXT NOT NULL, `id_materia` TEXT, `id_carpeta` TEXT, `titulo` TEXT NOT NULL, `contenido` TEXT, `tipo_visibilidad` TEXT NOT NULL, `es_original` INTEGER NOT NULL, `id_apunte_original` TEXT, `id_usuario_original` TEXT, `total_likes` INTEGER NOT NULL, `total_guardados` INTEGER NOT NULL, `fecha_creacion` INTEGER NOT NULL, `fecha_actualizacion` INTEGER, `tiene_dibujos` INTEGER NOT NULL, `tiene_imagenes` INTEGER NOT NULL, `tiene_postits` INTEGER NOT NULL, `sync_status` TEXT NOT NULL, `last_sync` INTEGER, `is_deleted` INTEGER NOT NULL, PRIMARY KEY(`id_apunte`), FOREIGN KEY(`id_usuario`) REFERENCES `usuario`(`id_usuario`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`id_materia`) REFERENCES `materia`(`id_materia`) ON UPDATE NO ACTION ON DELETE SET NULL , FOREIGN KEY(`id_carpeta`) REFERENCES `carpeta`(`id_carpeta`) ON UPDATE NO ACTION ON DELETE SET NULL )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id_apunte` TEXT NOT NULL, `id_usuario` TEXT NOT NULL, `id_materia` TEXT, `id_carpeta` TEXT, `titulo` TEXT NOT NULL, `descripcion` TEXT, `contenido` TEXT, `tipo_visibilidad` TEXT NOT NULL, `es_original` INTEGER NOT NULL, `id_apunte_original` TEXT, `id_usuario_original` TEXT, `total_likes` INTEGER NOT NULL, `total_guardados` INTEGER NOT NULL, `fecha_creacion` INTEGER NOT NULL, `fecha_actualizacion` INTEGER, `tiene_dibujos` INTEGER NOT NULL, `tiene_imagenes` INTEGER NOT NULL, `tiene_postits` INTEGER NOT NULL, `is_favorito` INTEGER NOT NULL, `sync_status` TEXT NOT NULL, `last_sync` INTEGER, `is_deleted` INTEGER NOT NULL, PRIMARY KEY(`id_apunte`), FOREIGN KEY(`id_usuario`) REFERENCES `usuario`(`id_usuario`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`id_materia`) REFERENCES `materia`(`id_materia`) ON UPDATE NO ACTION ON DELETE SET NULL , FOREIGN KEY(`id_carpeta`) REFERENCES `carpeta`(`id_carpeta`) ON UPDATE NO ACTION ON DELETE SET NULL )",
         "fields": [
           {
             "fieldPath": "idApunte",
@@ -380,6 +380,12 @@
             "columnName": "titulo",
             "affinity": "TEXT",
             "notNull": true
+          },
+          {
+            "fieldPath": "descripcion",
+            "columnName": "descripcion",
+            "affinity": "TEXT",
+            "notNull": false
           },
           {
             "fieldPath": "contenido",
@@ -450,6 +456,12 @@
           {
             "fieldPath": "tienePostits",
             "columnName": "tiene_postits",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isFavorito",
+            "columnName": "is_favorito",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -1025,7 +1037,7 @@
       },
       {
         "tableName": "seguimiento",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id_seguimiento` TEXT NOT NULL, `id_seguidor` TEXT NOT NULL, `id_seguido` TEXT NOT NULL, `fecha_seguimiento` INTEGER NOT NULL, `sync_status` TEXT NOT NULL, `is_deleted` INTEGER NOT NULL, PRIMARY KEY(`id_seguimiento`), FOREIGN KEY(`id_seguidor`) REFERENCES `usuario`(`id_usuario`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`id_seguido`) REFERENCES `usuario`(`id_usuario`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id_seguimiento` TEXT NOT NULL, `id_seguidor` TEXT NOT NULL, `id_seguido` TEXT NOT NULL, `fecha_seguimiento` INTEGER NOT NULL, `sync_status` TEXT NOT NULL, `is_deleted` INTEGER NOT NULL, PRIMARY KEY(`id_seguimiento`), FOREIGN KEY(`id_seguidor`) REFERENCES `usuario`(`id_usuario`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`id_seguido`) REFERENCES `usuario`(`id_usuario`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "idSeguimiento",
@@ -1103,7 +1115,7 @@
         "foreignKeys": [
           {
             "table": "usuario",
-            "onDelete": "NO ACTION",
+            "onDelete": "CASCADE",
             "onUpdate": "NO ACTION",
             "columns": [
               "id_seguidor"
@@ -1114,7 +1126,7 @@
           },
           {
             "table": "usuario",
-            "onDelete": "NO ACTION",
+            "onDelete": "CASCADE",
             "onUpdate": "NO ACTION",
             "columns": [
               "id_seguido"
@@ -1129,7 +1141,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '77ce0f5705d627308f63252266859390')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'a55714d7155592bdc3ddd445892328f9')"
     ]
   }
 }

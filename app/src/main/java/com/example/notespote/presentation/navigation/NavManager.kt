@@ -133,13 +133,30 @@ fun NavManager() {
             val homeViewModel: HomeViewModel = hiltViewModel()
             AllFoldersView(
                 onBackClick = { navController.popBackStack() },
-                onFolderClick = { navController.navigate(Routes.FolderDetail.route) },
+                onFolderClick = { folderId ->
+                    navController.navigate(Routes.FolderDetail.createRoute(folderId))
+                },
                 viewModel = homeViewModel
             )
         }
 
-        composable(Routes.FolderDetail.route) {
-            FolderDetailView(onBackClick = { navController.popBackStack() })
+        composable(
+            route = Routes.FolderDetail.route,
+            arguments = listOf(androidx.navigation.navArgument("folderId") {
+                type = androidx.navigation.NavType.StringType
+            })
+        ) { backStackEntry ->
+            val folderId = backStackEntry.arguments?.getString("folderId") ?: return@composable
+            val homeViewModel: HomeViewModel = hiltViewModel()
+
+            FolderDetailView(
+                folderId = folderId,
+                onBackClick = { navController.popBackStack() },
+                onNoteClick = { apunteId ->
+                    navController.navigate(Routes.NoteContent.createRoute(apunteId))
+                },
+                homeViewModel = homeViewModel
+            )
         }
 
         composable(

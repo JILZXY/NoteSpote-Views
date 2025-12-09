@@ -18,6 +18,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Note
+import androidx.compose.material.icons.filled.Notes
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.AlertDialog
@@ -77,6 +79,7 @@ fun HomeView(
     onNotificationsClick: () -> Unit,
     onSeeAllFoldersClick: () -> Unit,
     onNoteClick: (String) -> Unit,
+    onFolderClick: (String) -> Unit,
     viewModel: HomeViewModel,
     carpetaViewModel: CarpetaViewModel = hiltViewModel(),
     apunteViewModel: ApunteViewModel = hiltViewModel()
@@ -103,12 +106,14 @@ fun HomeView(
     var folderToDelete by remember { mutableStateOf<Carpeta?>(null) }
     var folderToUpdate by remember { mutableStateOf<Carpeta?>(null) }
     var apunteToDelete by remember { mutableStateOf<Apunte?>(null) }
+    var apunteForOptions by remember { mutableStateOf<Apunte?>(null) }
+    var showMoveToFolderDialog by remember { mutableStateOf(false) }
 
     // Carpetas predeterminadas
     val defaultFolders = listOf(
         FolderCardData("Recientes", Color(0xFF97DECC), Icons.Default.History),
         FolderCardData("Favoritos", Color(0xFFFFF347), Icons.Default.Star),
-        FolderCardData("Todos los archivos", Color(0xFFFD99FF), Icons.Default.Folder)
+        FolderCardData("Todos los archivos", Color(0xFFFD99FF), Icons.Default.Notes)
     )
 
     // Convertir carpetas del usuario a pares (Carpeta, FolderCardData) (solo las primeras 5 para HomeView)
@@ -282,7 +287,16 @@ fun HomeView(
                         items(allFolders) { (carpeta, folderData) ->
                             FolderCard(
                                 folder = folderData,
-                                onClick = { /* TODO: onClick */ },
+                                onClick = {
+                                    // Determinar el ID de la carpeta
+                                    val folderId = when (folderData.title) {
+                                        "Recientes" -> com.example.notespote.presentation.navigation.Routes.FolderDetail.RECIENTES
+                                        "Favoritos" -> com.example.notespote.presentation.navigation.Routes.FolderDetail.FAVORITOS
+                                        "Todos los archivos" -> com.example.notespote.presentation.navigation.Routes.FolderDetail.TODOS
+                                        else -> carpeta?.id ?: return@FolderCard
+                                    }
+                                    onFolderClick(folderId)
+                                },
                                 onRename = carpeta?.let { { folderToUpdate = it } },
                                 onDelete = carpeta?.let { { folderToDelete = it } }
                             )
@@ -317,14 +331,18 @@ fun HomeView(
                                 NoteCard(
                                     note = NoteCardData(
                                         title = apunte.titulo,
-                                        description = "Sin descripción",
+                                        description = apunte.descripcion ?: "Sin descripción",
                                         tags = emptyList(), // Las etiquetas se pueden agregar después
-                                        subject = apunte.idMateria ?: "Sin materia",
+                                        subject = uiState.getMateriaName(apunte.idMateria),
                                         date = formattedDate,
                                         isPublic = apunte.tipoVisibilidad == TipoVisibilidad.PUBLICO
                                     ),
                                     onClick = { onNoteClick(apunte.id) },
-                                    onLongClick = { apunteToDelete = apunte }
+                                    onLongClick = { apunteForOptions = apunte },
+                                    onFavoriteClick = {
+                                        apunteViewModel.toggleFavorito(apunte.id)
+                                    },
+                                    isFavorito = apunte.isFavorito
                                 )
                             }
                         }
@@ -369,6 +387,177 @@ fun HomeView(
             onDismiss = { apunteToDelete = null }
         )
     }
+
+    // Diálogo de opciones para apunte (long press)
+    apunteForOptions?.let { apunte ->
+        NoteOptionsDialog(
+            noteTitle = apunte.titulo,
+            onUpdate = {
+                // TODO: Navegar a la vista de edición
+                onNoteClick(apunte.id)
+                apunteForOptions = null
+            },
+            onDelete = {
+                apunteToDelete = apunte
+                apunteForOptions = null
+            },
+            onMove = {
+                showMoveToFolderDialog = true
+            },
+            onDismiss = { apunteForOptions = null }
+        )
+    }
+
+    // Diálogo de mover apunte a carpeta
+    if (showMoveToFolderDialog && apunteForOptions != null) {
+        MoveToFolderDialog(
+            folders = uiState.recentFolders,
+            onSelectFolder = { carpetaId ->
+                apunteForOptions?.let { apunte ->
+                    // Si carpetaId es vacío, pasamos null para sacar el apunte de la carpeta
+                    val targetCarpetaId = if (carpetaId.isEmpty()) null else carpetaId
+                    apunteViewModel.moveApunteToFolder(apunte.id, targetCarpetaId)
+                }
+                showMoveToFolderDialog = false
+                apunteForOptions = null
+            },
+            onDismiss = {
+                showMoveToFolderDialog = false
+                apunteForOptions = null
+            }
+        )
+    }
+}
+
+@Composable
+private fun NoteOptionsDialog(
+    noteTitle: String,
+    onUpdate: () -> Unit,
+    onDelete: () -> Unit,
+    onMove: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                "Opciones de apunte",
+                fontFamily = OutfitFamily,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
+        },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    "\"$noteTitle\"",
+                    fontFamily = OutfitFamily,
+                    color = Color.Gray,
+                    fontSize = 14.sp
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Botón Actualizar
+                Button(
+                    onClick = onUpdate,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = Celeste)
+                ) {
+                    Text("Actualizar", fontFamily = OutfitFamily, color = RichBlack)
+                }
+
+                // Botón Mover a carpeta
+                Button(
+                    onClick = onMove,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFB347))
+                ) {
+                    Text("Mover a carpeta", fontFamily = OutfitFamily, color = RichBlack)
+                }
+
+                // Botón Eliminar
+                Button(
+                    onClick = onDelete,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                ) {
+                    Text("Eliminar", fontFamily = OutfitFamily, color = Color.White)
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancelar", fontFamily = OutfitFamily, color = Color.White)
+            }
+        },
+        containerColor = Color(0xFF1E1E1E)
+    )
+}
+
+@Composable
+private fun MoveToFolderDialog(
+    folders: List<Carpeta>,
+    onSelectFolder: (String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                "Mover a carpeta",
+                fontFamily = OutfitFamily,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
+        },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    "Selecciona la carpeta de destino:",
+                    fontFamily = OutfitFamily,
+                    color = Color.Gray,
+                    fontSize = 14.sp
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Opción para sacar de carpeta
+                Button(
+                    onClick = { onSelectFolder("") },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
+                ) {
+                    Text("Sin carpeta", fontFamily = OutfitFamily, color = Color.White)
+                }
+
+                if (folders.isNotEmpty()) {
+                    folders.forEach { carpeta ->
+                        val colorHex = carpeta.colorCarpeta?.removePrefix("#") ?: "FFB347"
+                        val color = try {
+                            Color(android.graphics.Color.parseColor("#$colorHex"))
+                        } catch (e: Exception) {
+                            Color(0xFFFFB347)
+                        }
+
+                        Button(
+                            onClick = { onSelectFolder(carpeta.id) },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(containerColor = color)
+                        ) {
+                            Text(carpeta.nombreCarpeta, fontFamily = OutfitFamily, color = RichBlack)
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancelar", fontFamily = OutfitFamily, color = Color.White)
+            }
+        },
+        containerColor = Color(0xFF1E1E1E)
+    )
 }
 
 @Composable

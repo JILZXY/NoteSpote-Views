@@ -13,6 +13,7 @@ class CreateApunteUseCase @Inject constructor(
 ) {
     suspend operator fun invoke(
         titulo: String,
+        descripcion: String?,
         contenido: String?,
         idCarpeta: String?,
         idMateria: String?,
@@ -29,6 +30,7 @@ class CreateApunteUseCase @Inject constructor(
         val apunte = Apunte(
             idUsuario = userId,
             titulo = titulo,
+            descripcion = descripcion,
             contenido = contenido,
             idCarpeta = idCarpeta,
             idMateria = idMateria,

@@ -226,12 +226,10 @@ private fun Apunte.toCommunityCardData(): CommunityCardData {
 
     return CommunityCardData(
         subject = this.idMateria ?: "Sin materia",
-        noteImageResId = R.drawable.mascot_notespot, // Placeholder
         title = this.titulo,
-        description = this.contenido?.take(100) ?: "Sin descripción",
+        description = this.descripcion ?: "Sin descripción",
         tags = emptyList(), // TODO: Cargar etiquetas reales
         authorName = "Usuario", // TODO: Cargar nombre de usuario real
-        authorImageResId = R.drawable.mascot_notespot, // Placeholder
         date = date
     )
 }

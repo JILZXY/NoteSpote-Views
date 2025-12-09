@@ -448,7 +448,7 @@ private fun Apunte.toNoteCardData(): NoteCardData {
 
     return NoteCardData(
         title = this.titulo,
-        description = "Sin descripción",
+        description = this.descripcion ?: "Sin descripción",
         tags = emptyList(),
         date = date,
         isPublic = this.tipoVisibilidad == com.example.notespote.data.local.entities.TipoVisibilidad.PUBLICO,

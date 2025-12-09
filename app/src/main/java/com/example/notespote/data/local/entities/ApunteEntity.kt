@@ -43,6 +43,7 @@ data class ApunteEntity(
     @ColumnInfo(name = "id_materia") val idMateria: String?,
     @ColumnInfo(name = "id_carpeta") val idCarpeta: String?,
     @ColumnInfo(name = "titulo") val titulo: String,
+    @ColumnInfo(name = "descripcion") val descripcion: String?,
     @ColumnInfo(name = "contenido") val contenido: String?,
     @ColumnInfo(name = "tipo_visibilidad") val tipoVisibilidad: TipoVisibilidad,
     @ColumnInfo(name = "es_original") val esOriginal: Boolean = true,
@@ -55,6 +56,7 @@ data class ApunteEntity(
     @ColumnInfo(name = "tiene_dibujos") val tieneDibujos: Boolean = false,
     @ColumnInfo(name = "tiene_imagenes") val tieneImagenes: Boolean = false,
     @ColumnInfo(name = "tiene_postits") val tienePostits: Boolean = false,
+    @ColumnInfo(name = "is_favorito") val isFavorito: Boolean = false,
     @ColumnInfo(name = "sync_status") val syncStatus: SyncStatus = SyncStatus.SYNCED,
     @ColumnInfo(name = "last_sync") val lastSync: Long? = null,
     @ColumnInfo(name = "is_deleted") val isDeleted: Boolean = false

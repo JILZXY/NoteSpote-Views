@@ -239,6 +239,7 @@ class ApunteViewModel @Inject constructor(
 
     fun createApunte(
         titulo: String,
+        descripcion: String?,
         contenido: String?,
         idCarpeta: String?,
         idMateria: String?,
@@ -250,6 +251,7 @@ class ApunteViewModel @Inject constructor(
             _uiState.value = ApunteUiState.Loading
             val result = createApunteUseCase(
                 titulo = titulo,
+                descripcion = descripcion,
                 contenido = contenido,
                 idCarpeta = idCarpeta,
                 idMateria = idMateria,
@@ -287,6 +289,40 @@ class ApunteViewModel @Inject constructor(
                 ApunteUiState.Deleted
             } else {
                 ApunteUiState.Error(result.exceptionOrNull()?.message ?: "Error al eliminar apunte")
+            }
+        }
+    }
+
+    fun moveApunteToFolder(apunteId: String, carpetaId: String?) {
+        viewModelScope.launch {
+            _uiState.value = ApunteUiState.Loading
+            // Obtener el apunte actual
+            val apunteResult = getApunteByIdUseCase(apunteId).map { it.getOrNull()?.apunte }
+            apunteResult.collect { apunte ->
+                if (apunte != null) {
+                    // Actualizar el apunte con la nueva carpeta (null significa sin carpeta)
+                    val updatedApunte = apunte.copy(idCarpeta = carpetaId)
+                    val result = updateApunteUseCase(updatedApunte)
+                    _uiState.value = if (result.isSuccess) {
+                        ApunteUiState.Updated
+                    } else {
+                        ApunteUiState.Error(result.exceptionOrNull()?.message ?: "Error al mover apunte")
+                    }
+                } else {
+                    _uiState.value = ApunteUiState.Error("Apunte no encontrado")
+                }
+            }
+        }
+    }
+
+    fun toggleFavorito(apunteId: String) {
+        viewModelScope.launch {
+            val apunteResult = getApunteByIdUseCase(apunteId).map { it.getOrNull()?.apunte }
+            apunteResult.collect { apunte ->
+                if (apunte != null) {
+                    val updatedApunte = apunte.copy(isFavorito = !apunte.isFavorito)
+                    updateApunteUseCase(updatedApunte)
+                }
             }
         }
     }

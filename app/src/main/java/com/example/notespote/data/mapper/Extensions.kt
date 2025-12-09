@@ -12,6 +12,7 @@ fun ApunteEntity.toDto(): ApunteDto {
         idMateria = idMateria,
         idCarpeta = idCarpeta,
         titulo = titulo,
+        descripcion = descripcion,
         contenido = contenido,
         tipoVisibilidad = tipoVisibilidad.name,
         esOriginal = esOriginal,
@@ -24,6 +25,7 @@ fun ApunteEntity.toDto(): ApunteDto {
         tieneDibujos = tieneDibujos,
         tieneImagenes = tieneImagenes,
         tienePostits = tienePostits,
+        isFavorito = isFavorito,
         updatedAt = Timestamp.now(),
         isDeleted = isDeleted
     )
@@ -36,6 +38,7 @@ fun ApunteDto.toEntity(): ApunteEntity {
         idMateria = idMateria,
         idCarpeta = idCarpeta,
         titulo = titulo,
+        descripcion = descripcion,
         contenido = contenido,
         tipoVisibilidad = TipoVisibilidad.valueOf(tipoVisibilidad),
         esOriginal = esOriginal,
@@ -48,6 +51,7 @@ fun ApunteDto.toEntity(): ApunteEntity {
         tieneDibujos = tieneDibujos,
         tieneImagenes = tieneImagenes,
         tienePostits = tienePostits,
+        isFavorito = isFavorito,
         syncStatus = SyncStatus.SYNCED,
         lastSync = System.currentTimeMillis(),
         isDeleted = isDeleted

@@ -18,6 +18,7 @@ class ApunteMapper @Inject constructor() {
             idMateria = entity.idMateria,
             idCarpeta = entity.idCarpeta,
             titulo = entity.titulo,
+            descripcion = entity.descripcion,
             contenido = entity.contenido,
             tipoVisibilidad = entity.tipoVisibilidad,
             esOriginal = entity.esOriginal,
@@ -29,7 +30,8 @@ class ApunteMapper @Inject constructor() {
             fechaActualizacion = entity.fechaActualizacion,
             tieneDibujos = entity.tieneDibujos,
             tieneImagenes = entity.tieneImagenes,
-            tienePostits = entity.tienePostits
+            tienePostits = entity.tienePostits,
+            isFavorito = entity.isFavorito
         )
     }
 
@@ -40,6 +42,7 @@ class ApunteMapper @Inject constructor() {
             idMateria = domain.idMateria,
             idCarpeta = domain.idCarpeta,
             titulo = domain.titulo,
+            descripcion = domain.descripcion,
             contenido = domain.contenido,
             tipoVisibilidad = domain.tipoVisibilidad,
             esOriginal = domain.esOriginal,
@@ -52,6 +55,7 @@ class ApunteMapper @Inject constructor() {
             tieneDibujos = domain.tieneDibujos,
             tieneImagenes = domain.tieneImagenes,
             tienePostits = domain.tienePostits,
+            isFavorito = domain.isFavorito,
             syncStatus = SyncStatus.PENDING_UPLOAD,
             lastSync = null,
             isDeleted = false
@@ -65,6 +69,7 @@ class ApunteMapper @Inject constructor() {
             idMateria = entity.idMateria,
             idCarpeta = entity.idCarpeta,
             titulo = entity.titulo,
+            descripcion = entity.descripcion,
             contenido = entity.contenido,
             tipoVisibilidad = entity.tipoVisibilidad.name,
             esOriginal = entity.esOriginal,
@@ -77,6 +82,7 @@ class ApunteMapper @Inject constructor() {
             tieneDibujos = entity.tieneDibujos,
             tieneImagenes = entity.tieneImagenes,
             tienePostits = entity.tienePostits,
+            isFavorito = entity.isFavorito,
             updatedAt = Timestamp.now(),
             isDeleted = entity.isDeleted
         )
@@ -89,6 +95,7 @@ class ApunteMapper @Inject constructor() {
             idMateria = dto.idMateria,
             idCarpeta = dto.idCarpeta,
             titulo = dto.titulo,
+            descripcion = dto.descripcion,
             contenido = dto.contenido,
             tipoVisibilidad = TipoVisibilidad.valueOf(dto.tipoVisibilidad),
             esOriginal = dto.esOriginal,
@@ -101,6 +108,7 @@ class ApunteMapper @Inject constructor() {
             tieneDibujos = dto.tieneDibujos,
             tieneImagenes = dto.tieneImagenes,
             tienePostits = dto.tienePostits,
+            isFavorito = dto.isFavorito,
             syncStatus = SyncStatus.SYNCED,
             lastSync = System.currentTimeMillis(),
             isDeleted = dto.isDeleted

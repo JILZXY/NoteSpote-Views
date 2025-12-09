@@ -273,7 +273,7 @@ private fun Apunte.toNoteCardData(): NoteCardData {
 
     return NoteCardData(
         title = this.titulo,
-        description = "Sin descripción",
+        description = this.descripcion ?: "Sin descripción",
         tags = emptyList(), // Las etiquetas se pueden cargar después si es necesario
         date = date,
         isPublic = this.tipoVisibilidad == TipoVisibilidad.PUBLICO,

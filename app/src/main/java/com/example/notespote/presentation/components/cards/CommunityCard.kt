@@ -42,12 +42,10 @@ import com.example.notespote.presentation.theme.OutfitFamily
 
 data class CommunityCardData(
     val subject: String,
-    val noteImageResId: Int,
     val title: String,
     val description: String,
     val tags: List<Pair<String, Color>>,
     val authorName: String,
-    val authorImageResId: Int,
     val date: String
 )
 
@@ -74,16 +72,6 @@ fun CommunityCard(card: CommunityCardData, onAuthorClick: () -> Unit) {
                 Text(card.subject, color = Color.White, fontWeight = FontWeight.Bold, fontFamily = OutfitFamily)
             }
 
-            // Note Image
-            Image(
-                painter = painterResource(id = card.noteImageResId),
-                contentDescription = "Contenido del apunte",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(150.dp),
-                contentScale = ContentScale.Crop
-            )
-
             // Content
             Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(card.title, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp, fontFamily = OutfitFamily)
@@ -102,22 +90,11 @@ fun CommunityCard(card: CommunityCardData, onAuthorClick: () -> Unit) {
                     .padding(horizontal = 12.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    modifier = Modifier.clickable { onAuthorClick() },
-                    verticalAlignment = Alignment.CenterVertically
+                Column(
+                    modifier = Modifier.clickable { onAuthorClick() }
                 ) {
-                    Image(
-                        painter = painterResource(id = card.authorImageResId),
-                        contentDescription = "Autor",
-                        modifier = Modifier
-                            .size(30.dp)
-                            .clip(CircleShape)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Column {
-                        Text(card.authorName, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp, fontFamily = OutfitFamily)
-                        InfoChip(text = card.date, color = Color(0xFFFFB347), icon = Icons.Default.CalendarToday)
-                    }
+                    Text(card.authorName, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp, fontFamily = OutfitFamily)
+                    InfoChip(text = card.date, color = Color(0xFFFFB347), icon = Icons.Default.CalendarToday)
                 }
                 Spacer(modifier = Modifier.weight(1f))
                 IconButton(onClick = { /*TODO*/ }) {

@@ -76,6 +76,9 @@ fun MainScreen(navController: NavController) {
                         onNoteClick = { apunteId ->
                             navController.navigate(Routes.NoteContent.createRoute(apunteId))
                         },
+                        onFolderClick = { folderId ->
+                            navController.navigate(Routes.FolderDetail.createRoute(folderId))
+                        },
                         viewModel = homeViewModel
                     )
                 }
@@ -130,7 +133,8 @@ fun MainScreen(navController: NavController) {
                 // Crear apunte (sin carpeta ni materia por ahora, se pueden agregar después)
                 apunteViewModel.createApunte(
                     titulo = note.title,
-                    contenido = note.description,
+                    descripcion = note.description,
+                    contenido = null,
                     idCarpeta = null,
                     idMateria = null,
                     tipoVisibilidad = tipoVisibilidad,
