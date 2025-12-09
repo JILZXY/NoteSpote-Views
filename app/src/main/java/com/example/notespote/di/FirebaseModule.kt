@@ -1,5 +1,6 @@
 package com.example.notespote.di
 
+import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
@@ -10,6 +11,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
+// di/FirebaseModule.kt
 @Module
 @InstallIn(SingletonComponent::class)
 object FirebaseModule {
@@ -17,29 +19,31 @@ object FirebaseModule {
     @Provides
     @Singleton
     fun provideFirestore(): FirebaseFirestore {
-        val firestore = FirebaseFirestore.getInstance()
+        val firestore = FirebaseFirestore.getInstance("databasenote")
 
-        // CONFIGURACIÓN CLAVE:
-        // 1. Habilitamos logs para ver errores internos en el Logcat (busca "Firestore")
+        // ✅ Habilitar logs para debugging
         FirebaseFirestore.setLoggingEnabled(true)
 
-        // 2. Configuramos la persistencia explícitamente.
-        // Esto hace que las escrituras (.set) sean instantáneas (al caché local)
-        // y evita que la app se quede "congelada" esperando al servidor.
+        // ✅ Configuración adicional (opcional, para testing)
         val settings = FirebaseFirestoreSettings.Builder()
-            .setPersistenceEnabled(true)
-            .setCacheSizeBytes(FirebaseFirestoreSettings.CACHE_SIZE_UNLIMITED)
+            .setPersistenceEnabled(true)  // Cache local
             .build()
-
         firestore.firestoreSettings = settings
+
+        Log.d("FirebaseModule", "✅ Firestore inicializado: $firestore")
+
         return firestore
     }
 
     @Provides
     @Singleton
-    fun provideFirebaseStorage(): FirebaseStorage = FirebaseStorage.getInstance()
+    fun provideFirebaseStorage(): FirebaseStorage {
+        return FirebaseStorage.getInstance()
+    }
 
     @Provides
     @Singleton
-    fun provideFirebaseAuth(): FirebaseAuth = FirebaseAuth.getInstance()
+    fun provideFirebaseAuth(): FirebaseAuth {
+        return FirebaseAuth.getInstance()
+    }
 }

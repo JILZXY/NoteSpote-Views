@@ -1,5 +1,6 @@
 package com.example.notespot.presentation.views
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -280,7 +281,6 @@ fun HomeView(
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
-
                     LazyRow(
                         horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {

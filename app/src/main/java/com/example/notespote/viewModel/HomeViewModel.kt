@@ -2,8 +2,10 @@
 package com.example.notespote.viewModel
 
 import android.util.Log
+import androidx.compose.foundation.layout.add
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.work.await
 import com.example.notespote.domain.model.Apunte
 import com.example.notespote.domain.model.Carpeta
 import com.example.notespote.domain.repository.ApunteRepository
@@ -16,6 +18,8 @@ import com.example.notespote.domain.usecases.folders.GetCarpetasRaizUseCase
 import com.example.notespote.domain.usecases.notes.GetMyApunteUseCase
 import com.example.notespote.domain.usecases.sync.SyncAllUseCase
 import com.example.notespote.viewModel.states.HomeUiState
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -23,6 +27,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 @HiltViewModel
@@ -296,6 +301,39 @@ class HomeViewModel @Inject constructor(
             }.onFailure { error ->
                 android.util.Log.e("HomeViewModel", "Error creating carpeta: ${'$'}{error.message}", error)
                 // Manejar el error (podrías agregar un estado de error al UiState)
+            }
+        }
+    }
+
+    fun runFirestoreTest() {
+        // Usamos viewModelScope, que sí está disponible aquí.
+        viewModelScope.launch {
+            try {
+                Log.d("FirestoreTest", "🔥 Iniciando test desde el ViewModel...")
+
+                val testData = hashMapOf(
+                    "titulo" to "Test Apunte desde ViewModel",
+                    "contenido" to "Contenido de prueba exitoso",
+                    "timestamp" to System.currentTimeMillis(),
+                    "userId" to (FirebaseAuth.getInstance().currentUser?.uid ?: "test_user_id")
+                )
+
+                // Obtenemos la instancia de Firestore aquí, en la capa correcta.
+                FirebaseFirestore.getInstance()
+                    .collection("apuntes_test")
+                    .add(testData)
+                    .addOnSuccessListener { docRef ->
+                        Log.d("FirestoreTest", "✅✅✅ DOCUMENTO CREADO: ${docRef.id}")
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("FirestoreTest", "❌❌❌ ERROR: ${e.message}", e)
+                    }
+                    .await() // await() suspende la corrutina hasta que la tarea se complete.
+
+                Log.d("FirestoreTest", "✅ Test completado desde el ViewModel.")
+
+            } catch (e: Exception) {
+                Log.e("FirestoreTest", "❌ Error en el test del ViewModel", e)
             }
         }
     }

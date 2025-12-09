@@ -16,6 +16,7 @@ import com.example.notespote.data.mapper.ArchivoAdjuntoMapper
 import com.example.notespote.data.mapper.EtiquetaMapper
 import com.example.notespote.data.mapper.PostitMapper
 import com.example.notespote.data.network.NetworkMonitor
+import com.example.notespote.di.ApplicationScope
 import com.example.notespote.domain.model.Apunte
 import com.example.notespote.domain.model.ApunteDetallado
 import com.example.notespote.domain.model.FiltroApuntes
@@ -51,10 +52,9 @@ class ApunteRepositoryImpl @Inject constructor(
     private val archivoMapper: ArchivoAdjuntoMapper,
     private val postitMapper: PostitMapper,
     private val etiquetaMapper: EtiquetaMapper,
+    @ApplicationScope private val applicationScope: CoroutineScope,
     @ApplicationContext private val context: Context
 ) : ApunteRepository {
-
-    private val repositoryScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override fun getApuntesByUser(userId: String): Flow<Result<List<Apunte>>> {
         return apunteDao.getApuntesByUser(userId)
@@ -109,7 +109,6 @@ class ApunteRepositoryImpl @Inject constructor(
 
             apunteDao.insert(entity)
 
-            // Guardar archivos localmente
             archivos.forEachIndexed { index, uri ->
                 val fileName = "archivo_$index.${fileManager.getFileExtension(uri)}"
                 val rutaLocal = fileManager.saveFileFromUri(apunteId, fileName, uri)
@@ -130,13 +129,9 @@ class ApunteRepositoryImpl @Inject constructor(
                 archivoDao.insert(archivoEntity)
             }
 
-            // ✅ CAMBIO: Esperar la sincronización
             if (networkMonitor.isCurrentlyConnected()) {
-                try {
-                    syncApunteNow(apunteId) // Renombrar y hacer pública
-                } catch (e: Exception) {
-                    Log.e("ApunteRepo", "Error en sync, quedará pendiente: ${e.message}")
-                    // El apunte queda con PENDING_UPLOAD para sincronizar después
+                applicationScope.launch {
+                    syncApunte(apunteId)
                 }
             }
 
@@ -144,59 +139,6 @@ class ApunteRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             Log.e("ApunteRepository", "Error creating apunte", e)
             Result.failure(e)
-        }
-    }
-
-    suspend fun syncApunteNow(apunteId: String) {
-        Log.d("SyncApunte", "🔄 Iniciando sync para: $apunteId")
-
-        val apunte = apunteDao.getApunteById(apunteId)
-        if (apunte == null) {
-            Log.e("SyncApunte", "❌ Apunte no encontrado")
-            return
-        }
-
-        Log.d("SyncApunte", "📄 Apunte encontrado, syncStatus: ${apunte.syncStatus}")
-
-        when (apunte.syncStatus) {
-            SyncStatus.PENDING_UPLOAD -> {
-                Log.d("SyncApunte", "📤 Subiendo archivos...")
-
-                // Subir archivos primero
-                val archivos = archivoDao.getArchivosByApunte(apunteId).first()
-                archivos.forEach { archivo ->
-                    if (archivo.rutaLocal != null && archivo.urlFirebase == null) {
-                        Log.d("SyncApunte", "📎 Subiendo: ${archivo.nombreArchivo}")
-
-                        val url = uploadFileToStorage(archivo)
-
-                        Log.d("SyncApunte", "✅ Archivo subido: $url")
-
-                        archivoDao.update(
-                            archivo.copy(
-                                urlFirebase = url,
-                                syncStatus = SyncStatus.SYNCED
-                            )
-                        )
-                    }
-                }
-
-                Log.d("SyncApunte", "📤 Subiendo apunte a Firestore...")
-
-                // Subir apunte a Firestore
-                val dto = apunteMapper.entityToDto(apunte)
-                firestore.collection("apuntes")
-                    .document(apunteId)
-                    .set(dto)
-                    .await()
-
-                Log.d("SyncApunte", "✅ Apunte subido exitosamente")
-
-                apunteDao.updateSyncStatus(apunteId, SyncStatus.SYNCED)
-            }
-            else -> {
-                Log.d("SyncApunte", "⏭️ No requiere sync: ${apunte.syncStatus}")
-            }
         }
     }
 
@@ -210,7 +152,7 @@ class ApunteRepositoryImpl @Inject constructor(
             apunteDao.update(entity)
 
             if (networkMonitor.isCurrentlyConnected()) {
-                repositoryScope.launch {
+                applicationScope.launch {
                     syncApunte(apunte.id)
                 }
             }
@@ -228,7 +170,7 @@ class ApunteRepositoryImpl @Inject constructor(
             fileManager.deleteApunteFiles(id)
 
             if (networkMonitor.isCurrentlyConnected()) {
-                repositoryScope.launch {
+                applicationScope.launch {
                     syncApunte(id)
                 }
             }
@@ -302,7 +244,7 @@ class ApunteRepositoryImpl @Inject constructor(
             val pendingApuntes = apunteDao.getPendingSyncApuntes()
 
             pendingApuntes.forEach { apunte ->
-                repositoryScope.launch {
+                applicationScope.launch {
                     syncApunte(apunte.idApunte)
                 }
             }
@@ -374,5 +316,78 @@ class ApunteRepositoryImpl @Inject constructor(
             .catch { e ->
                 emit(Result.failure(e))
             }
+    }
+
+    suspend fun syncApunteNow(apunteId: String) {
+        Log.d("SyncApunte", "🔥 === INICIO SYNC APUNTE ===")
+        Log.d("SyncApunte", "ApunteID: $apunteId")
+
+        val apunte = apunteDao.getApunteById(apunteId)
+        if (apunte == null) {
+            Log.e("SyncApunte", "❌ APUNTE NO ENCONTRADO EN BD LOCAL")
+            return
+        }
+
+        Log.d("SyncApunte", "✅ Apunte encontrado: ${apunte.titulo}")
+        Log.d("SyncApunte", "SyncStatus: ${apunte.syncStatus}")
+
+        when (apunte.syncStatus) {
+            SyncStatus.PENDING_UPLOAD -> {
+                try {
+                    // Subir archivos primero
+                    val archivos = archivoDao.getArchivosByApunte(apunteId).first()
+                    Log.d("SyncApunte", "📎 Archivos a subir: ${archivos.size}")
+
+                    archivos.forEach { archivo ->
+                        if (archivo.rutaLocal != null && archivo.urlFirebase == null) {
+                            Log.d("SyncApunte", "⬆️ Subiendo archivo: ${archivo.nombreArchivo}")
+                            val url = uploadFileToStorage(archivo)
+                            Log.d("SyncApunte", "✅ URL obtenida: $url")
+
+                            archivoDao.update(
+                                archivo.copy(
+                                    urlFirebase = url,
+                                    syncStatus = SyncStatus.SYNCED
+                                )
+                            )
+                        }
+                    }
+
+                    // AQUÍ ES DONDE DEBE SUBIR A FIRESTORE
+                    Log.d("SyncApunte", "=== SUBIENDO A FIRESTORE ===")
+
+                    val dto = apunteMapper.entityToDto(apunte)
+                    Log.d("SyncApunte", "DTO Titulo: ${dto.titulo}")
+                    Log.d("SyncApunte", "DTO ID: ${dto.id}")
+                    Log.d("SyncApunte", "DTO UserID: ${dto.idUsuario}")
+
+                    // Verificar instancia de Firestore
+                    Log.d("SyncApunte", "Firestore instance: $firestore")
+
+                    // Intentar subir
+                    firestore.collection("apuntes")
+                        .document(apunteId)
+                        .set(dto)
+                        .addOnSuccessListener {
+                            Log.d("SyncApunte", "✅✅✅ ÉXITO EN FIRESTORE!")
+                        }
+                        .addOnFailureListener { e ->
+                            Log.e("SyncApunte", "❌❌❌ ERROR EN FIRESTORE: ${e.message}", e)
+                        }
+                        .await()
+
+                    Log.d("SyncApunte", "🎯 Actualizando estado a SYNCED")
+                    apunteDao.updateSyncStatus(apunteId, SyncStatus.SYNCED)
+
+                    Log.d("SyncApunte", "✅ === FIN SYNC EXITOSO ===")
+                } catch (e: Exception) {
+                    Log.e("SyncApunte", "❌ === ERROR EN SYNC ===", e)
+                    e.printStackTrace()
+                }
+            }
+            else -> {
+                Log.d("SyncApunte", "⏭️ No requiere sync, estado: ${apunte.syncStatus}")
+            }
+        }
     }
 }
