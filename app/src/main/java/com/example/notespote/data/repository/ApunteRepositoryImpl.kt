@@ -23,11 +23,14 @@ import com.example.notespote.domain.repository.ApunteRepository
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.util.UUID
@@ -51,27 +54,20 @@ class ApunteRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context
 ) : ApunteRepository {
 
-    override fun getApuntesByUser(userId: String): Flow<Result<List<com.example.notespote.domain.model.Apunte>>> {
-        // Usamos el constructor flow para tener control total
-        return kotlinx.coroutines.flow.flow {
-            try {
-                // Nos suscribimos al Flow del DAO dentro del bloque
-                apunteDao.getApuntesByUser(userId).collect { entities ->
-                    // Mapeamos los datos y los envolvemos en Result.success
-                    val apuntes = entities.map { apunteMapper.toDomain(it) }
-                    // Emitimos el resultado exitoso
-                    emit(Result.success(apuntes))
-                }
-            } catch (e: Exception) {
-                // Si ocurre cualquier error en el flujo (en el DAO o en el collect), lo capturamos
+    private val repositoryScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    override fun getApuntesByUser(userId: String): Flow<Result<List<Apunte>>> {
+        return apunteDao.getApuntesByUser(userId)
+            .map { entities ->
+                Result.success(entities.map { apunteMapper.toDomain(it) })
+            }
+            .catch { e ->
                 Log.e("ApunteRepository", "Error en getApuntesByUser", e)
-                // Emitimos el resultado de fallo
                 emit(Result.failure(e))
             }
-        }
     }
 
-    override fun getApuntesByFolder(folderId: String): Flow<Result<List<com.example.notespote.domain.model.Apunte>>> {
+    override fun getApuntesByFolder(folderId: String): Flow<Result<List<Apunte>>> {
         return apunteDao.getApuntesByFolder(folderId)
             .map { entities ->
                 Result.success(entities.map { apunteMapper.toDomain(it) })
@@ -81,7 +77,7 @@ class ApunteRepositoryImpl @Inject constructor(
             }
     }
 
-    override fun getApunteById(id: String): Flow<Result<com.example.notespote.domain.model.ApunteDetallado>> {
+    override fun getApunteById(id: String): Flow<Result<ApunteDetallado>> {
         return kotlinx.coroutines.flow.flow {
             val apunteWithDetails = apunteDao.getApunteWithDetails(id)
             if (apunteWithDetails != null) {
@@ -101,7 +97,7 @@ class ApunteRepositoryImpl @Inject constructor(
     }
 
     override suspend fun createApunte(
-        apunte: com.example.notespote.domain.model.Apunte,
+        apunte: Apunte,
         archivos: List<Uri>
     ): Result<String> = withContext(Dispatchers.IO) {
         try {
@@ -111,10 +107,8 @@ class ApunteRepositoryImpl @Inject constructor(
                 syncStatus = SyncStatus.PENDING_UPLOAD
             )
 
-            // Guardar apunte localmente
             apunteDao.insert(entity)
 
-            // Guardar archivos localmente
             archivos.forEachIndexed { index, uri ->
                 val fileName = "archivo_$index.${fileManager.getFileExtension(uri)}"
                 val rutaLocal = fileManager.saveFileFromUri(apunteId, fileName, uri)
@@ -135,9 +129,10 @@ class ApunteRepositoryImpl @Inject constructor(
                 archivoDao.insert(archivoEntity)
             }
 
-            // Intentar sincronizar si hay conexión
             if (networkMonitor.isCurrentlyConnected()) {
-                syncApunte(apunteId)
+                repositoryScope.launch {
+                    syncApunte(apunteId)
+                }
             }
 
             Result.success(apunteId)
@@ -147,7 +142,7 @@ class ApunteRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun updateApunte(apunte: com.example.notespote.domain.model.Apunte): Result<Unit> = withContext(Dispatchers.IO) {
+    override suspend fun updateApunte(apunte: Apunte): Result<Unit> = withContext(Dispatchers.IO) {
         try {
             val entity = apunteMapper.toEntity(apunte).copy(
                 syncStatus = SyncStatus.PENDING_UPDATE,
@@ -156,9 +151,10 @@ class ApunteRepositoryImpl @Inject constructor(
 
             apunteDao.update(entity)
 
-            // Intentar sincronizar si hay conexión
             if (networkMonitor.isCurrentlyConnected()) {
-                syncApunte(apunte.id)
+                repositoryScope.launch {
+                    syncApunte(apunte.id)
+                }
             }
 
             Result.success(Unit)
@@ -170,15 +166,13 @@ class ApunteRepositoryImpl @Inject constructor(
 
     override suspend fun deleteApunte(id: String): Result<Unit> = withContext(Dispatchers.IO) {
         try {
-            // Marcar como eliminado (soft delete)
             apunteDao.markAsDeleted(id)
-
-            // Eliminar archivos locales
             fileManager.deleteApunteFiles(id)
 
-            // Intentar sincronizar si hay conexión
             if (networkMonitor.isCurrentlyConnected()) {
-                syncApunte(id)
+                repositoryScope.launch {
+                    syncApunte(id)
+                }
             }
 
             Result.success(Unit)
@@ -190,31 +184,25 @@ class ApunteRepositoryImpl @Inject constructor(
 
     override suspend fun guardarApunte(apunteId: String): Result<Unit> = withContext(Dispatchers.IO) {
         try {
-            // Obtener el apunte original
             val apunteOriginal = apunteDao.getApunteById(apunteId)
                 ?: return@withContext Result.failure(Exception("Apunte no encontrado"))
 
-            // Crear una copia del apunte
             val nuevoApunteId = UUID.randomUUID().toString()
             val apunteCopia = apunteOriginal.copy(
                 idApunte = nuevoApunteId,
                 esOriginal = false,
                 idApunteOriginal = apunteId,
                 idUsuarioOriginal = apunteOriginal.idUsuario,
-                // Cambiar el usuario al actual (se debería obtener del AuthRepository)
-                // idUsuario = currentUserId,
                 syncStatus = SyncStatus.PENDING_UPLOAD
             )
 
             apunteDao.insert(apunteCopia)
 
-            // Actualizar contador de guardados
             apunteDao.update(
                 apunteOriginal.copy(
                     totalGuardados = apunteOriginal.totalGuardados + 1
                 )
             )
-
             Result.success(Unit)
         } catch (e: Exception) {
             Log.e("ApunteRepository", "Error saving apunte", e)
@@ -223,10 +211,11 @@ class ApunteRepositoryImpl @Inject constructor(
     }
 
     override suspend fun toggleLike(apunteId: String, userId: String): Result<Unit> {
+        // This should probably be implemented with a background job as well
         return Result.success(Unit)
     }
 
-    override fun getPublicApuntes(limit: Int): Flow<Result<List<com.example.notespote.domain.model.Apunte>>> {
+    override fun getPublicApuntes(limit: Int): Flow<Result<List<Apunte>>> {
         return apunteDao.getPublicApuntes(limit)
             .map { entities ->
                 Result.success(entities.map { apunteMapper.toDomain(it) })
@@ -237,7 +226,7 @@ class ApunteRepositoryImpl @Inject constructor(
     }
 
     override fun searchApuntes(filtro: FiltroApuntes): Flow<Result<List<Apunte>>> {
-        return apunteDao.getPublicApuntes(50)
+        return apunteDao.getPublicApuntes(50) // Placeholder
             .map { entities ->
                 Result.success(entities.map { apunteMapper.toDomain(it) })
             }
@@ -252,11 +241,12 @@ class ApunteRepositoryImpl @Inject constructor(
                 return@withContext Result.failure(Exception("Sin conexión a internet"))
             }
 
-            // Obtener apuntes pendientes de sincronización
             val pendingApuntes = apunteDao.getPendingSyncApuntes()
 
             pendingApuntes.forEach { apunte ->
-                syncApunte(apunte.idApunte)
+                repositoryScope.launch {
+                    syncApunte(apunte.idApunte)
+                }
             }
 
             Result.success(Unit)
@@ -271,12 +261,10 @@ class ApunteRepositoryImpl @Inject constructor(
             val apunte = apunteDao.getApunteById(apunteId) ?: return
 
             when (apunte.syncStatus) {
-                SyncStatus.PENDING_UPLOAD -> {
-                    // Subir archivos primero
+                SyncStatus.PENDING_UPLOAD, SyncStatus.PENDING_UPDATE -> {
                     val archivos = archivoDao.getArchivosByApunte(apunteId).first()
                     archivos.forEach { archivo ->
                         if (archivo.rutaLocal != null && archivo.urlFirebase == null) {
-                            // Subir a Firebase Storage
                             val url = uploadFileToStorage(archivo)
                             archivoDao.update(
                                 archivo.copy(
@@ -287,48 +275,20 @@ class ApunteRepositoryImpl @Inject constructor(
                         }
                     }
 
-                    // Subir apunte a Firestore
                     val dto = apunteMapper.entityToDto(apunte)
-                    firestore.collection("apuntes")
-                        .document(apunteId)
-                        .set(dto)
-                        .addOnSuccessListener {
-                            Log.d("ApunteRepository", "Apunte $apunteId synced to Firestore successfully.")
-                            // Marcar como sincronizado
-                            kotlinx.coroutines.runBlocking {
-                                apunteDao.updateSyncStatus(apunteId, SyncStatus.SYNCED)
-                            }
-                        }
-                        .addOnFailureListener { e ->
-                            Log.e("ApunteRepository", "Error uploading apunte", e)
-                        }
-                }
-                SyncStatus.PENDING_UPDATE -> {
-                    val dto = apunteMapper.entityToDto(apunte)
-                    firestore.collection("apuntes")
-                        .document(apunteId)
-                        .set(dto)
-                        .addOnSuccessListener {
-                            Log.d("ApunteRepository", "Apunte $apunteId updated in Firestore successfully.")
-                            kotlinx.coroutines.runBlocking {
-                                apunteDao.updateSyncStatus(apunteId, SyncStatus.SYNCED)
-                            }
-                        }
+                    firestore.collection("apuntes").document(apunteId).set(dto).await()
+                    Log.d("ApunteRepository", "✅ Apunte $apunteId synced to Firestore.")
+                    apunteDao.updateSyncStatus(apunteId, SyncStatus.SYNCED)
                 }
                 SyncStatus.PENDING_DELETE -> {
-                    firestore.collection("apuntes")
-                        .document(apunteId)
-                        .update("isDeleted", true)
-                        .addOnSuccessListener {
-                            kotlinx.coroutines.runBlocking {
-                                apunteDao.delete(apunteId)
-                            }
-                        }
+                    firestore.collection("apuntes").document(apunteId).update("isDeleted", true).await()
+                    apunteDao.delete(apunteId)
+                    Log.d("ApunteRepository", "✅ Apunte $apunteId deleted from Firestore.")
                 }
                 else -> {}
             }
         } catch (e: Exception) {
-            Log.e("ApunteRepository", "Error syncing apunte $apunteId", e)
+            Log.e("ApunteRepository", "❌ Error syncing apunte $apunteId", e)
         }
     }
 
@@ -343,10 +303,7 @@ class ApunteRepositoryImpl @Inject constructor(
             val uri = fileManager.getFileUri(archivo.rutaLocal)
                 ?: throw Exception("No se pudo obtener URI del archivo")
 
-            val uploadTask = storageRef.putFile(uri)
-
-            uploadTask.await()
-
+            storageRef.putFile(uri).await()
             storageRef.downloadUrl.await().toString()
         }
     }

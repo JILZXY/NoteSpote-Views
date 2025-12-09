@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -26,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,23 +39,29 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.notespote.R
+import com.example.notespote.data.local.entities.TipoVisibilidad
+import com.example.notespote.domain.model.Apunte
 import com.example.notespote.presentation.components.cards.CommunityCard
 import com.example.notespote.presentation.components.cards.CommunityCardData
 import com.example.notespote.presentation.theme.OutfitFamily
 import com.example.notespote.presentation.theme.RichBlack
+import com.example.notespote.viewModel.CommunityViewModel
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CommunityView(onAuthorClick: () -> Unit) {
-    var searchQuery by remember { mutableStateOf("") }
+fun CommunityView(
+    onAuthorClick: () -> Unit,
+    onNoteClick: (String) -> Unit = {},
+    viewModel: CommunityViewModel = hiltViewModel()
+) {
+    val uiState by viewModel.uiState.collectAsState()
     var showFilters by remember { mutableStateOf(false) }
     val filterChips = listOf("Todos", "Apuntes", "Biología", "Matemáticas", "Física")
-
-    val communityPosts = listOf(
-        CommunityCardData("Matemáticas", R.drawable.mascot_notespot, "My Homework", "Límites: El concepto de límite es fundamental...", listOf("Ejercicios" to Color(0xFFB39DDB), "Cálculo integral" to Color(0xFFB39DDB)), "Naimur", R.drawable.mascot_notespot, "24/07/2025")
-        // Add more posts here
-    )
 
     Column(
         modifier = Modifier
@@ -67,7 +75,6 @@ fun CommunityView(onAuthorClick: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            // This could be your user profile header
             Text("Comunidad", color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Bold, fontFamily = OutfitFamily)
         }
 
@@ -80,8 +87,8 @@ fun CommunityView(onAuthorClick: () -> Unit) {
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             TextField(
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
+                value = uiState.searchQuery,
+                onValueChange = { viewModel.onSearchQueryChange(it) },
                 placeholder = { Text("Buscar en la comunidad...", color = Color.Gray) },
                 modifier = Modifier
                     .weight(1f)
@@ -133,13 +140,98 @@ fun CommunityView(onAuthorClick: () -> Unit) {
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Results Header
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                "Apuntes de la comunidad",
+                color = Color.White,
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp,
+                fontFamily = OutfitFamily
+            )
+
+            if (uiState.isLoading) {
+                CircularProgressIndicator(
+                    color = Color.White,
+                    modifier = Modifier.padding(8.dp)
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Error message
+        uiState.error?.let { error ->
+            Text(
+                text = "Error: $error",
+                color = Color.Red,
+                fontSize = 14.sp,
+                fontFamily = OutfitFamily
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+        }
 
         // Community Posts
         LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            items(communityPosts) { post ->
-                CommunityCard(card = post, onAuthorClick = onAuthorClick)
+            items(uiState.apuntes) { apunte ->
+                Box(
+                    modifier = Modifier.clickable { onNoteClick(apunte.id) }
+                ) {
+                    CommunityCard(
+                        card = apunte.toCommunityCardData(),
+                        onAuthorClick = onAuthorClick
+                    )
+                }
+            }
+
+            // No results message
+            if (!uiState.isLoading && uiState.apuntes.isEmpty() && uiState.searchQuery.isNotBlank()) {
+                item {
+                    Text(
+                        text = "No se encontraron apuntes públicos para '${uiState.searchQuery}'",
+                        color = Color.Gray,
+                        fontSize = 14.sp,
+                        fontFamily = OutfitFamily,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
+            }
+
+            // Empty state
+            if (!uiState.isLoading && uiState.apuntes.isEmpty() && uiState.searchQuery.isBlank()) {
+                item {
+                    Text(
+                        text = "No hay apuntes públicos disponibles",
+                        color = Color.Gray,
+                        fontSize = 14.sp,
+                        fontFamily = OutfitFamily,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
             }
         }
     }
+}
+
+// Función auxiliar para convertir Apunte a CommunityCardData
+private fun Apunte.toCommunityCardData(): CommunityCardData {
+    val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+    val date = dateFormat.format(Date(this.fechaCreacion))
+
+    return CommunityCardData(
+        subject = this.idMateria ?: "Sin materia",
+        noteImageResId = R.drawable.mascot_notespot, // Placeholder
+        title = this.titulo,
+        description = this.contenido?.take(100) ?: "Sin descripción",
+        tags = emptyList(), // TODO: Cargar etiquetas reales
+        authorName = "Usuario", // TODO: Cargar nombre de usuario real
+        authorImageResId = R.drawable.mascot_notespot, // Placeholder
+        date = date
+    )
 }

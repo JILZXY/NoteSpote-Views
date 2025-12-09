@@ -11,11 +11,14 @@ import com.example.notespote.domain.model.Carpeta
 import com.example.notespote.domain.model.CarpetaContenido
 import com.example.notespote.domain.repository.CarpetaRepository
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.util.UUID
@@ -31,6 +34,8 @@ class CarpetaRepositoryImpl @Inject constructor(
     private val carpetaMapper: CarpetaMapper,
     private val apunteMapper: ApunteMapper
 ) : CarpetaRepository {
+
+    private val repositoryScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override fun getCarpetasByUser(userId: String): Flow<Result<List<Carpeta>>> {
         return carpetaDao.getCarpetasByUser(userId)
@@ -120,14 +125,15 @@ class CarpetaRepositoryImpl @Inject constructor(
             Log.d("CarpetaRepository", "Carpeta inserted successfully with ID: $carpetaId")
 
             if (networkMonitor.isCurrentlyConnected()) {
-                Log.d("CarpetaRepository", "Network connected, syncing carpeta")
-                syncCarpeta(carpetaId)
-                Log.d("CarpetaRepository", "Carpeta synced successfully")
+                Log.d("CarpetaRepository", "Network connected, launching sync job for carpeta $carpetaId")
+                repositoryScope.launch {
+                    syncCarpeta(carpetaId)
+                }
             } else {
                 Log.d("CarpetaRepository", "Network not connected, skipping sync")
             }
 
-            Log.d("CarpetaRepository", "Returning success result")
+            Log.d("CarpetaRepository", "Returning success result for carpeta $carpetaId")
             Result.success(carpetaId)
         } catch (e: Exception) {
             Log.e("CarpetaRepository", "Error creating carpeta", e)
@@ -144,7 +150,9 @@ class CarpetaRepositoryImpl @Inject constructor(
             carpetaDao.update(entity)
 
             if (networkMonitor.isCurrentlyConnected()) {
-                syncCarpeta(carpeta.id)
+                repositoryScope.launch {
+                    syncCarpeta(carpeta.id)
+                }
             }
 
             Result.success(Unit)
@@ -159,12 +167,19 @@ class CarpetaRepositoryImpl @Inject constructor(
             carpetaDao.markAsDeleted(carpetaId)
 
             if (networkMonitor.isCurrentlyConnected()) {
-                firestore.collection("carpetas")
-                    .document(carpetaId)
-                    .update("isDeleted", true)
-                    .await()
+                repositoryScope.launch {
+                    try {
+                        firestore.collection("carpetas")
+                            .document(carpetaId)
+                            .update("isDeleted", true)
+                            .await()
 
-                carpetaDao.delete(carpetaId)
+                        // Only delete locally after successful remote deletion
+                        carpetaDao.delete(carpetaId)
+                    } catch (e: Exception) {
+                        Log.e("CarpetaRepository", "Error deleting carpeta from Firestore, will retry later.", e)
+                    }
+                }
             }
 
             Result.success(Unit)
@@ -187,12 +202,9 @@ class CarpetaRepositoryImpl @Inject constructor(
             )
 
             if (networkMonitor.isCurrentlyConnected()) {
-                firestore.collection("carpetas")
-                    .document(carpetaId)
-                    .update("idCarpetaPadre", nuevoPadreId)
-                    .await()
-
-                carpetaDao.updateSyncStatus(carpetaId, SyncStatus.SYNCED)
+                repositoryScope.launch {
+                   syncCarpeta(carpetaId)
+                }
             }
 
             Result.success(Unit)
@@ -204,14 +216,26 @@ class CarpetaRepositoryImpl @Inject constructor(
 
     override suspend fun reordenarCarpetas(carpetas: List<Pair<String, Int>>): Result<Unit> = withContext(Dispatchers.IO) {
         try {
+            val batch = firestore.batch()
             carpetas.forEach { (carpetaId, orden) ->
                 carpetaDao.updateOrden(carpetaId, orden)
-
                 if (networkMonitor.isCurrentlyConnected()) {
-                    firestore.collection("carpetas")
-                        .document(carpetaId)
-                        .update("orden", orden)
-                        .await()
+                    val docRef = firestore.collection("carpetas").document(carpetaId)
+                    batch.update(docRef, "orden", orden)
+                }
+            }
+
+            if (networkMonitor.isCurrentlyConnected()) {
+                repositoryScope.launch {
+                    try {
+                        batch.commit().await()
+                    } catch (e: Exception) {
+                        Log.e("CarpetaRepository", "Error reordenando carpetas in Firestore", e)
+                        // Mark them as pending update to retry later
+                        carpetas.forEach { (carpetaId, _) ->
+                            carpetaDao.updateSyncStatus(carpetaId, SyncStatus.PENDING_UPDATE)
+                        }
+                    }
                 }
             }
 
@@ -242,30 +266,43 @@ class CarpetaRepositoryImpl @Inject constructor(
 
     private suspend fun syncCarpeta(carpetaId: String) {
         try {
-            val carpeta = carpetaDao.getCarpetaById(carpetaId) ?: return
+            val carpeta = carpetaDao.getCarpetaById(carpetaId) ?: run {
+                Log.e("CarpetaRepository", "Carpeta $carpetaId not found in local database")
+                return
+            }
+
+            Log.d("CarpetaRepository", "Syncing carpeta $carpetaId with status ${carpeta.syncStatus}")
 
             when (carpeta.syncStatus) {
                 SyncStatus.PENDING_UPLOAD, SyncStatus.PENDING_UPDATE -> {
                     val dto = carpetaMapper.entityToDto(carpeta)
+                    Log.d("CarpetaRepository", "Uploading carpeta to Firestore: ${dto}")
+
                     firestore.collection("carpetas")
                         .document(carpetaId)
                         .set(dto)
                         .await()
-                    Log.d("CarpetaRepository", "Carpeta $carpetaId synced to Firestore successfully.")
+
+                    Log.d("CarpetaRepository", "✅ Carpeta $carpetaId synced to Firestore successfully")
                     carpetaDao.updateSyncStatus(carpetaId, SyncStatus.SYNCED)
                 }
                 SyncStatus.PENDING_DELETE -> {
+                    Log.d("CarpetaRepository", "Deleting carpeta from Firestore")
                     firestore.collection("carpetas")
                         .document(carpetaId)
                         .update("isDeleted", true)
                         .await()
 
                     carpetaDao.delete(carpetaId)
+                    Log.d("CarpetaRepository", "✅ Carpeta $carpetaId deleted from Firestore")
                 }
-                else -> {}
+                else -> {
+                    Log.d("CarpetaRepository", "Carpeta $carpetaId already synced, skipping")
+                }
             }
         } catch (e: Exception) {
-            Log.e("CarpetaRepository", "Error syncing carpeta $carpetaId", e)
+            Log.e("CarpetaRepository", "❌ Error syncing carpeta $carpetaId: ${e.message}", e)
+            // No lanzar la excepción para que la carpeta se quede en local
         }
     }
 }

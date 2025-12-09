@@ -49,6 +49,7 @@ fun MainScreen(navController: NavController) {
 
     var showNoteDialog by remember { mutableStateOf(false) }
     var showFolderDialog by remember { mutableStateOf(false) }
+    var selectedPdfUri by remember { mutableStateOf<android.net.Uri?>(null) }
 
     Scaffold(
         bottomBar = {
@@ -82,15 +83,33 @@ fun MainScreen(navController: NavController) {
                     SearchView()
                 }
                 composable(BottomNavItem.Community.route) {
-                    CommunityView(onAuthorClick = { navController.navigate(Routes.UserProfile.route) })
+                    CommunityView(
+                        onAuthorClick = { navController.navigate(Routes.UserProfile.route) },
+                        onNoteClick = { apunteId ->
+                            navController.navigate(Routes.NoteContent.createRoute(apunteId))
+                        }
+                    )
                 }
             }
         }
     }
 
+    // File picker para importar PDF
+    val pdfPickerLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
+        contract = androidx.activity.result.contract.ActivityResultContracts.GetContent()
+    ) { uri ->
+        if (uri != null) {
+            android.util.Log.d("MainScreen", "PDF selected: $uri")
+            selectedPdfUri = uri
+        }
+    }
+
     if (showNoteDialog) {
         NewNoteView(
-            onDismiss = { showNoteDialog = false },
+            onDismiss = {
+                showNoteDialog = false
+                selectedPdfUri = null // Limpiar PDF seleccionado al cerrar
+            },
             onCreateNote = { note: Note ->
                 // Crear el apunte usando el ViewModel
                 android.util.Log.d("MainScreen", "Creating note: title=${note.title}, subject=${note.subject}")
@@ -101,6 +120,13 @@ fun MainScreen(navController: NavController) {
                 else
                     com.example.notespote.data.local.entities.TipoVisibilidad.PRIVADO
 
+                // Preparar lista de archivos si hay PDF seleccionado
+                val archivos = if (selectedPdfUri != null) {
+                    listOf(selectedPdfUri!!)
+                } else {
+                    emptyList()
+                }
+
                 // Crear apunte (sin carpeta ni materia por ahora, se pueden agregar después)
                 apunteViewModel.createApunte(
                     titulo = note.title,
@@ -108,7 +134,7 @@ fun MainScreen(navController: NavController) {
                     idCarpeta = null,
                     idMateria = null,
                     tipoVisibilidad = tipoVisibilidad,
-                    archivos = emptyList()
+                    archivos = archivos
                 )
 
                 // Esperar un momento y recargar los datos
@@ -118,6 +144,11 @@ fun MainScreen(navController: NavController) {
                 }
 
                 showNoteDialog = false
+                selectedPdfUri = null // Limpiar PDF seleccionado
+            },
+            onUploadFile = {
+                // Lanzar el selector de archivos PDF
+                pdfPickerLauncher.launch("application/pdf")
             }
         )
     }

@@ -185,13 +185,16 @@ fun NavManager() {
             apunteDetallado?.let { detalle: com.example.notespote.domain.model.ApunteDetallado ->
                 val context = androidx.compose.ui.platform.LocalContext.current
 
-                com.example.notespote.presentation.views.BlockBasedNoteContentView(
+                NoteContentView(
                     apunteDetallado = detalle,
-                    noteBlocks = noteBlocks,
                     onBackClick = { navController.popBackStack() },
-                    onSaveClick = { titulo ->
-                        // Update apunte with new title
-                        val updatedApunte = detalle.apunte.copy(titulo = titulo)
+                    onEditClick = { /* Implementar edición */ },
+                    onSaveClick = { titulo, contenido, tags ->
+                        // Update apunte with new data
+                        val updatedApunte = detalle.apunte.copy(
+                            titulo = titulo,
+                            contenido = contenido
+                        )
                         apunteViewModel.updateApunte(updatedApunte)
                     },
                     onAddTag = { tagParam ->
@@ -204,12 +207,7 @@ fun NavManager() {
                             apunteViewModel.agregarEtiqueta(apunteId, tagParam)
                         }
                     },
-                    onAddTextBlock = {
-                        apunteViewModel.addTextBlock()
-                    },
-                    onAddPostipBlock = {
-                        apunteViewModel.addPostipBlock()
-                    },
+                    onAddText = { /* No usado en nueva arquitectura */ },
                     onUploadFile = {
                         // Lanzar selector de archivos (PDF, DOCX, TXT, etc.)
                         filePickerLauncher.launch("*/*")
@@ -218,13 +216,7 @@ fun NavManager() {
                         // Lanzar selector de imágenes
                         imagePickerLauncher.launch("image/*")
                     },
-                    onDrawClick = { /* TODO: Implementar modo dibujo */ },
-                    onBlockContentChange = { blockId, newContent ->
-                        apunteViewModel.updateBlock(blockId, newContent)
-                    },
-                    onBlockDelete = { blockId ->
-                        apunteViewModel.deleteBlock(blockId)
-                    },
+                    onDrawClick = { /* Modo dibujo ya está implementado en la vista */ },
                     onOpenFile = { rutaLocal ->
                         try {
                             val file = java.io.File(rutaLocal)

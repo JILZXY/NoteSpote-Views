@@ -53,7 +53,8 @@ import com.example.notespote.presentation.theme.OutfitFamily
 @Composable
 fun NewNoteView(
     onDismiss: () -> Unit,
-    onCreateNote: (Note) -> Unit
+    onCreateNote: (Note) -> Unit,
+    onUploadFile: () -> Unit = {} // Callback para importar archivo PDF
 ) {
     var title by remember { mutableStateOf("") }
     var subject by remember { mutableStateOf("Otros") }
@@ -67,6 +68,8 @@ fun NewNoteView(
 
     var showSuccessDialog by remember { mutableStateOf(false) }
     var createdNoteData by remember { mutableStateOf<Note?>(null) }
+
+    var noteType by remember { mutableStateOf<String?>(null) } // "text" o "pdf"
 
     val subjects = listOf("Matemáticas", "Química", "Biología", "Otros")
     val hasContent = title.isNotBlank() || description.isNotBlank() || (showCustomSubject && customSubject.isNotBlank())
@@ -232,17 +235,27 @@ fun NewNoteView(
 
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         Button(
-                            onClick = {},
+                            onClick = { noteType = "text" },
                             modifier = Modifier.weight(1f).height(40.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color.Black, contentColor = Color.White),
-                            shape = RoundedCornerShape(10.dp)
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (noteType == "text") Color.Black else Color.White,
+                                contentColor = if (noteType == "text") Color.White else Color.Black
+                            ),
+                            shape = RoundedCornerShape(10.dp),
+                            border = BorderStroke(1.dp, Color.Black)
                         ) {
                             Text("Apunte de texto", fontSize = 12.sp, fontFamily = OutfitFamily, fontWeight = FontWeight.SemiBold)
                         }
                         Button(
-                            onClick = {},
+                            onClick = {
+                                noteType = "pdf"
+                                onUploadFile()
+                            },
                             modifier = Modifier.weight(1f).height(40.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color.Black),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (noteType == "pdf") Color.Black else Color.White,
+                                contentColor = if (noteType == "pdf") Color.White else Color.Black
+                            ),
                             shape = RoundedCornerShape(10.dp),
                             border = BorderStroke(1.dp, Color.Black)
                         ) {
