@@ -111,20 +111,21 @@ class SyncRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun syncApuntes(): Result<Unit> = withContext(Dispatchers.IO) {
+    override suspend fun syncCarpetas(): Result<Unit> = withContext(Dispatchers.IO) {
         try {
-            apunteRepository.syncApuntes()
+            // ✅ NO uses collect, usa el método directo del repository
+            carpetaRepository.syncCarpetas() // Este debe devolver Result<Unit>
         } catch (e: Exception) {
-            Log.e("SyncRepository", "Error syncing apuntes", e)
+            Log.e("SyncRepository", "Error syncing carpetas", e)
             Result.failure(e)
         }
     }
 
-    override suspend fun syncCarpetas(): Result<Unit> = withContext(Dispatchers.IO) {
+    override suspend fun syncApuntes(): Result<Unit> = withContext(Dispatchers.IO) {
         try {
-            carpetaRepository.syncCarpetas()
+            apunteRepository.syncApuntes() // Este debe devolver Result<Unit>
         } catch (e: Exception) {
-            Log.e("SyncRepository", "Error syncing carpetas", e)
+            Log.e("SyncRepository", "Error syncing apuntes", e)
             Result.failure(e)
         }
     }

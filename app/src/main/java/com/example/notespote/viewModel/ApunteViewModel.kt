@@ -246,6 +246,7 @@ class ApunteViewModel @Inject constructor(
         archivos: List<Uri>
     ) {
         viewModelScope.launch {
+            Log.d("ApunteVM", "🎯 Iniciando creación...")
             _uiState.value = ApunteUiState.Loading
             val result = createApunteUseCase(
                 titulo = titulo,
@@ -255,9 +256,12 @@ class ApunteViewModel @Inject constructor(
                 tipoVisibilidad = tipoVisibilidad,
                 archivos = archivos
             )
+            Log.d("ApunteVM", "📊 Resultado: ${result.isSuccess}")
             _uiState.value = if (result.isSuccess) {
+                Log.d("ApunteVM", "✅ Apunte creado: ${result.getOrNull()}")
                 ApunteUiState.Created(result.getOrNull()!!)
             } else {
+                Log.e("ApunteVM", "❌ Error: ${result.exceptionOrNull()?.message}")
                 ApunteUiState.Error(result.exceptionOrNull()?.message ?: "Error al crear apunte")
             }
         }

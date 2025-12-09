@@ -1,17 +1,25 @@
 // viewModel/HomeViewModel.kt
 package com.example.notespote.viewModel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.notespote.domain.model.Apunte
+import com.example.notespote.domain.model.Carpeta
+import com.example.notespote.domain.repository.ApunteRepository
+import com.example.notespote.domain.repository.AuthRepository
+import com.example.notespote.domain.repository.CarpetaRepository
 import com.example.notespote.domain.usecases.auth.GetCurrentUserUseCase
 import com.example.notespote.domain.usecases.folders.CreateCarpetaUseCase
 import com.example.notespote.domain.usecases.folders.GetCarpetasRaizUseCase
 import com.example.notespote.domain.usecases.notes.GetMyApunteUseCase
+import com.example.notespote.domain.usecases.sync.SyncAllUseCase
 import com.example.notespote.viewModel.states.HomeUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -22,7 +30,10 @@ class HomeViewModel @Inject constructor(
     private val getMyApunteUseCase: GetMyApunteUseCase,
     private val getCarpetasRaizUseCase: GetCarpetasRaizUseCase,
     private val createCarpetaUseCase: CreateCarpetaUseCase,
-    private val syncAllUseCase: com.example.notespote.domain.usecases.sync.SyncAllUseCase
+    private val syncAllUseCase: SyncAllUseCase,
+    private val carpetaRepository: CarpetaRepository,
+    private val apunteRepository: ApunteRepository,
+    private val authRepository: AuthRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
@@ -34,6 +45,7 @@ class HomeViewModel @Inject constructor(
         syncDataFromFirebase()
         loadHomeData()
         observeCarpetas()
+        loadUserData()
     }
 
     private fun syncDataFromFirebase() {
@@ -85,7 +97,43 @@ class HomeViewModel @Inject constructor(
             }
         }
     }
+    fun loadUserData() {
+        viewModelScope.launch {
+            try {
+                val userId = authRepository.getCurrentUserId()
+                if (userId != null) {
+                    // ✅ Cargar carpetas
+                    carpetaRepository.getCarpetasRaiz(userId)
+                        .catch { e ->
+                            Log.e("HomeVM", "Error carpetas: ${e.message}", e)
+                        }
+                        .collect { result ->
+                            result.onSuccess { carpetas ->
+                                _uiState.value = _uiState.value.copy(
+                                    recentFolders = carpetas.take(5)
+                                )
+                            }
+                        }
 
+                    // ✅ Cargar apuntes
+                    apunteRepository.getApuntesByUser(userId)
+                        .catch { e ->
+                            Log.e("HomeVM", "Error apuntes: ${e.message}", e)
+                        }
+                        .collect { result ->
+                            result.onSuccess { apuntes ->
+                                _uiState.value = _uiState.value.copy(
+                                    recentNotes = apuntes.take(5),
+                                    hasContent =  apuntes.isNotEmpty()
+                                )
+                            }
+                        }
+                }
+            } catch (e: Exception) {
+                Log.e("HomeVM", "Error general: ${e.message}", e)
+            }
+        }
+    }
     fun loadHomeData() {
         viewModelScope.launch {
             android.util.Log.d("HomeViewModel", "loadHomeData started")
@@ -211,3 +259,12 @@ class HomeViewModel @Inject constructor(
         }
     }
 }
+
+data class HomeUiState(
+    val isLoading: Boolean = false,
+    val userName: String = "",
+    val userProfilePhoto: String? = null,
+    val recentFolders: List<Carpeta> = emptyList(),
+    val recentNotes: List<Apunte> = emptyList(),
+    val hasContent: Boolean = false
+)

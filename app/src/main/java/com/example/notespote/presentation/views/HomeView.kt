@@ -29,6 +29,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -66,6 +67,7 @@ import com.example.notespote.presentation.views.UpdateFolderView
 import com.example.notespote.viewModel.ApunteViewModel
 import com.example.notespote.viewModel.CarpetaViewModel
 import com.example.notespote.viewModel.HomeViewModel
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun HomeView(
@@ -80,6 +82,23 @@ fun HomeView(
     apunteViewModel: ApunteViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+
+    val currentUser = FirebaseAuth.getInstance().currentUser
+
+    if (currentUser == null) {
+        // Redirigir a login
+        Text("Usuario no autenticado", color = Color.Red)
+        return
+    }
+
+    LaunchedEffect(Unit) {
+
+         val userId = FirebaseAuth.getInstance().currentUser?.uid
+         if (userId != null) {
+             carpetaViewModel.loadCarpetasRaiz(userId)
+             apunteViewModel.loadApuntesByUser(userId)
+         }
+    }
 
     var folderToDelete by remember { mutableStateOf<Carpeta?>(null) }
     var folderToUpdate by remember { mutableStateOf<Carpeta?>(null) }
